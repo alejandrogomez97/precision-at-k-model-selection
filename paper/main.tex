@@ -197,6 +197,19 @@ This spans budgets far larger and far smaller than the positive pool. Note this 
 distinct from the \emph{positives that land inside} the budget (which is at most $K$ and drives
 the results below); $n_{\text{pos}}/K$ compares the budget to the whole cohort's positive pool.
 
+\textit{Why sweep the budget?} $n_{\text{pos}}/K$ is a budget-relative measure of imbalance
+($=$ prevalence $\div$ inspection fraction), and precision@$k$'s reliability as a
+\emph{selector} is pulled by two opposing forces as $K$ varies. (i) As an estimator it is a
+proportion over $K$ items, so a larger $K$ (smaller $n_{\text{pos}}/K$) lowers its sampling
+variance and should make it more stable. (ii) But as $K$ approaches the whole cohort,
+precision@$k$ collapses to the base prevalence for \emph{every} model --- inspect everything and
+the hit rate is just the prevalence, independent of the ranking --- so it loses all power to
+tell models apart. Precision@$k$ can therefore only be a useful selector in a middle band, and
+we sweep $n_{\text{pos}}/K$ over two orders of magnitude to map it. A natural hypothesis is that
+this scale-free ratio predicts where precision@$k$ is reliable; Section~\ref{sec:results} shows
+it does not --- what governs reliability is the absolute count of positives inside the budget,
+not the ratio.
+
 \textbf{Selection under noise.} We bootstrap \citep{efron1994bootstrap} the validation set
 $120$ times; for each metric $m \in \{$precision@$k$, average precision (AP)
 \citep{davis2006prroc}, ROC-AUC, log-loss$\}$ we select $\arg\max_c m$ and record that
