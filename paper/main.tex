@@ -330,6 +330,31 @@ precision (green) stays at or below precision@$k$ (red).}
 \label{fig:families_count}
 \end{figure}
 
+The two other pieces of the fine analysis also replicate across families. The scale-free
+ratio $n_{\text{pos}}/K$ fails to order regret in \emph{any} family
+(Fig.~\ref{fig:families_ratio}: the curves are non-monotone and tangled), whereas the
+a-priori, model-free proxy $\min(K, n_{\text{pos}})$ orders it cleanly and monotonically in
+all three (Fig.~\ref{fig:families_apriori}). The count of positives in the budget --- not a
+ratio --- is what governs selection difficulty, regardless of the learner.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figs/figH_families_by_ratio.png}
+\caption{Regret versus the ratio $n_{\text{pos}}/K$, one panel per family. Unlike the count
+axis, the ratio does not order regret in any family --- confirming that a scale-free ratio is
+the wrong lens.}
+\label{fig:families_ratio}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figs/figI_families_by_apriori.png}
+\caption{Regret versus the a-priori proxy $\min(K, n_{\text{pos}})$, one panel per family.
+Knowable before training, it orders regret monotonically in all three, with average precision
+(green) at or below precision@$k$ (red) throughout.}
+\label{fig:families_apriori}
+\end{figure}
+
 \section{Discussion and recommendations}
 Keep precision@$k$ as the target and the headline evaluation metric, but not as the training
 loss and not, by default, as the selection metric. For selection, \textbf{default to average
