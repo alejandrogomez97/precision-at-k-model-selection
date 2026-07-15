@@ -26,15 +26,16 @@ for ax,key,ttl in [
     (a2,"minKN","A-priori & model-free: min(K, n_pos)\n(the most positives that COULD land in the budget)")]:
     cen,ser,ns=binned(key); xs=range(len(cen))
     for m in M3: ax.plot(xs,ser[m],"o-",color=COL[m],lw=2.2,ms=7,label=m)
-    ax.set_xticks(list(xs)); ax.set_xticklabels([f"≈{v:.0f}" for v in cen])
+    ax.set_xticks(list(xs)); ax.set_xticklabels([f"≈{v:.0f}\nn={n}" for v,n in zip(cen,ns)])
     rr=abs(spearmanr(c(info,key),mean_reg).correlation)
     ax.set_title(f"{ttl}\n|ρ| with regret = {rr:.2f}",fontsize=11)
     ax.set_xlabel(key.replace("pos_in_budget","precision × K (count)").replace("minKN","min(K, n_pos)"))
     ax.grid(alpha=.25)
 a1.set_ylabel("mean normalized regret (lower better)"); a2.legend(title="metric",loc="upper right")
-fig.text(0.5,-0.035,
+fig.text(0.5,-0.05,
          "How to read it (LightGBM):  → moving right = more positives in the budget (left: what the model achieves, precision×K;  right: the a-priori ceiling min(K, n_pos)).  "
-         "Each line = a metric used to pick the model; lower = better.  Every dot averages one equal-size group of ~50–55 dataset×budget cases.",
+         "Each line = a metric to pick the model; lower = better.\n"
+         "n under each tick = cases averaged (a \"case\" = one dataset at one budget K). The n's sum to 322, NOT 93: each of the 93 datasets is evaluated at up to 7 budgets K.",
          ha="center",fontsize=8,color="#555")
 rho=spearmanr(c(info,"pos_in_budget"),c(info,"minKN")).correlation
 fig.suptitle(f"You don't need the model to know if precision@K will be reliable:\n"

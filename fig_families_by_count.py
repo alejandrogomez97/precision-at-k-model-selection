@@ -40,7 +40,7 @@ for ax, fam in zip(axes, fams):
     for m in M3:
         ax.plot(xs, ser[m], "o-", color=COL[m], lw=2.2, ms=7, label=m)
     ax.set_xticks(list(xs))
-    ax.set_xticklabels([f"≈{v:.0f}" for v in cen])
+    ax.set_xticklabels([f"≈{v:.0f}\nn={n}" for v, n in zip(cen, ns)])
     ax.set_title(f"{LAB[fam]}  (N={len(info)})", fontsize=12)
     ax.set_xlabel("positives inside the budget (count)")
     ax.grid(alpha=0.25)
@@ -49,10 +49,11 @@ axes[2].legend(title="selection metric", loc="upper right")
 fig.suptitle("Same pattern in all three model families: as more positives land in the budget, regret falls —\n"
              "and average precision (green) stays at or below precision@k (red) throughout",
              fontsize=13, y=1.04)
-fig.text(0.5, -0.03,
-         "How to read it:  → moving right = datasets where MORE true positives fall inside the top-K budget (≈4, ≈9, … positives).  "
-         "Each coloured line = a metric used to PICK the model; lower = it picked better models (less regret).  "
-         "Every dot averages one equal-size group of datasets (~55–70 dataset×budget cases) — the groups are equal in size, which is why moving right the positives grow but each dot rests on a similar amount of data.",
+fig.text(0.5, -0.05,
+         "How to read it:  → moving right = datasets where MORE true positives fall inside the top-K budget (the ≈ number).  "
+         "Each coloured line = a metric used to PICK the model; lower = it picked better models (less regret).\n"
+         "n under each tick = number of cases averaged into that dot. A \"case\" = one dataset at one budget K. "
+         "The n's sum to N in the panel title (322 / 329 / 288), NOT 93: each of the 93 datasets is evaluated at up to 7 budgets K.",
          ha="center", fontsize=8, color="#555")
 fig.tight_layout()
 fig.savefig(f"{OUT}/figG_families_by_count.png", dpi=130, bbox_inches="tight")
