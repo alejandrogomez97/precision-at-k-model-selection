@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "Precision@k Is a Great Target and a Dangerous Judge: Model Selection for Fixed-Budget Top-k Problems"
+authors:
+  - family-names: "Gómez Ruiz"
+    given-names: "Alejandro"
+    affiliation: "Getronics"
+repository-code: "https://github.com/alejandrogomez97/precision-at-k-model-selection"
+license: MIT
+year: 2026
+keywords:
+  - model selection
+  - precision at k
+  - imbalanced classification
+  - winner's curse
+  - fixed-budget top-k

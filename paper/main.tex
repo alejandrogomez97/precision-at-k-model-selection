@@ -26,11 +26,14 @@ top $k$, where $k$ is a fixed external budget. The natural objective is
 because it is piecewise-constant and non-differentiable; we make the mechanism concrete
 with a worked gradient-boosting step. We then ask a less-examined question: should
 precision@$k$ be the metric used for \emph{model selection}? Across 93 imbalanced datasets
-(90 real, 3 synthetic) with the budget $K$ swept over two orders of magnitude, we find that
-selecting a model by validation precision@$k$ yields \emph{significantly worse} held-out
-precision@$k$ than selecting by log-loss or average precision (paired Wilcoxon,
-$p<2\times10^{-3}$, $n=322$): optimizing selection for the exact target metric is a
-losing move, a manifestation of selection-induced optimism (the winner's curse). We
+(90 real, 3 synthetic) with the budget $K$ swept over two orders of magnitude, and across
+three model families (gradient boosting, random forests, logistic regression), we find that
+selecting a model by validation \emph{average precision} yields \emph{significantly better}
+held-out precision@$k$ than selecting by precision@$k$ itself (paired Wilcoxon,
+$p<1.2\times10^{-3}$ in every family): optimizing selection for the exact target metric is a
+losing move, a manifestation of selection-induced optimism (the winner's curse). Log-loss is
+an equally good selector for gradient boosting but its edge is model-dependent, whereas
+average precision is robust; ROC-AUC is never better than precision@$k$. We
 further show that selection difficulty is governed \emph{not} by any scale-free ratio such
 as $n_{\text{pos}}/K$ (Spearman $|\rho|\!\approx\!0.19$), but by the absolute
 \emph{count} of true positives that land in the budget ($|\rho|\!\approx\!0.43$); its
@@ -52,9 +55,9 @@ Such problems are ubiquitous (audits, marketing, triage, moderation, lead scorin
 
 This paper makes three contributions. (i) We give a concrete, per-example account of why
 precision@$k$ cannot be a training loss for gradient-based learners
-(Section~\ref{sec:loss}). (ii) We show empirically, over 93 datasets, that precision@$k$ is
-also a poor \emph{model-selection} metric: log-loss and average precision select
-significantly better models on the very precision@$k$ objective
+(Section~\ref{sec:loss}). (ii) We show empirically, over 93 datasets and three model families, that precision@$k$ is
+also a poor \emph{model-selection} metric: average precision selects
+significantly better models on the very precision@$k$ objective, in every family
 (Section~\ref{sec:results}). This is an instance of the model-selection overfitting studied
 by \citet{cawley2010overfitting} and \citet{varma2006bias}, specialised to a high-variance
 top-$k$ metric. (iii) We characterise \emph{what} governs the choice: not a ratio of rates
@@ -247,10 +250,48 @@ precision) versus the number of positives in the budget.}
 \label{fig:opt}
 \end{figure}
 
+\paragraph{The result holds across model families.}
+The experiments above use LightGBM. To check that the conclusion is not an artefact of one
+learner, we repeat the entire selection study with two very different families: random
+forests and $L_2$-regularised logistic regression (25 configurations each; datasets
+subsampled to $15$k rows). Table~\ref{tab:families} and Fig.~\ref{fig:families} show the
+same qualitative picture in all three families: \textbf{average precision selects
+significantly better models than precision@$k$ everywhere} ($p\le1.2\times10^{-3}$), while
+ROC-AUC is never better than precision@$k$. Log-loss is tied-best for gradient boosting but
+does \emph{not} beat precision@$k$ for the other two families --- its advantage is
+model-dependent, whereas average precision's is robust.
+
+\begin{table}[h]
+\centering
+\caption{Robustness across model families. Mean normalized regret (lower is better) and
+paired Wilcoxon $p$-value versus precision@$k$. Average precision is significantly better than
+precision@$k$ in every family; log-loss only for LightGBM; ROC-AUC never.}
+\label{tab:families}
+\begin{tabular}{lcccc}
+\toprule
+ & precision@$k$ & average precision & log-loss & ROC-AUC \\
+\midrule
+LightGBM ($n{=}322$)            & 0.790 & 0.719 ($p{=}1.2{\times}10^{-3}$) & \textbf{0.714} ($6.1{\times}10^{-4}$) & 0.770 (n.s.) \\
+Random forest ($n{=}329$)       & 0.710 & \textbf{0.663} ($5.7{\times}10^{-4}$) & 0.746 (n.s.) & 0.717 (n.s.) \\
+Logistic reg.\ ($n{=}288$)      & 0.750 & \textbf{0.631} ($2.9{\times}10^{-4}$) & 0.697 (n.s.) & 0.839 (worse) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\linewidth]{figs/figF_families.png}
+\caption{Mean normalized regret per selection metric, grouped by model family. Average
+precision (green) is lowest in all three; log-loss (purple) leads only for gradient boosting.}
+\label{fig:families}
+\end{figure}
+
 \section{Discussion and recommendations}
 Keep precision@$k$ as the target and the headline evaluation metric, but not as the training
 loss and not, by default, as the selection metric. For selection, \textbf{default to average
-precision or log-loss}; use precision@$k$ only as a tie-breaker. The single lever that
+precision} --- it was the only metric to beat precision@$k$ significantly in every model
+family; log-loss is an equally good choice for gradient boosting but not in general. Use
+precision@$k$ only as a tie-breaker. The single lever that
 matters is knowable in advance: $\min(K, n_{\text{pos}})$, the number of positives that can
 land in the budget. When it is small, no selection metric is reliable --- invest in more
 labelled positives or a larger budget, not a cleverer metric. Finally, never quote raw
@@ -258,18 +299,19 @@ validation precision@$k$ as expected production performance when the budget is p
 report a nested/held-out estimate.
 
 \section{Limitations}
-We study one model family (LightGBM) and a fixed model bank, isolating selection noise but
-not early stopping (where the same variance argument applies). Ground-truth precision@$k$ on
-small datasets is itself estimated with noise, mitigated by pooling and by robust statistics
-(rank, win-rate, signed-rank tests). Results are statements about \emph{expected} selected
-quality. Extending to neural and linear models, and to explicit top-$k$ surrogate training,
-is future work.
+We study three model families (gradient boosting, random forests, logistic regression) but a
+fixed model bank, isolating selection noise but not early stopping (where the same variance
+argument applies). Ground-truth precision@$k$ on small datasets is itself estimated with
+noise, mitigated by pooling and by robust statistics (rank, win-rate, signed-rank tests).
+Results are statements about \emph{expected} selected quality. Extending to deep models, and
+to explicit top-$k$ surrogate training, is future work.
 
 \section{Conclusion}
 The metric you optimize and the metric you select with need not be the same. For fixed-budget
-top-$k$ problems, selecting on a stable proxy (log-loss, average precision) beats selecting on
-the noisy target metric itself, and the deciding factor is a plain count --- how many
-positives your budget will contain --- not a ratio of rates.
+top-$k$ problems, selecting on \emph{average precision} robustly beats selecting on the noisy
+target metric itself --- across 93 datasets and three model families --- and the deciding
+factor for how much any of this matters is a plain count, how many positives your budget will
+contain, not a ratio of rates.
 
 \paragraph{Reproducibility.} All code, the dataset list, and figures are released at
 \url{https://github.com/alejandrogomez97/precision-at-k-model-selection} and run from a fixed seed.

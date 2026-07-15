@@ -7,9 +7,11 @@ Across **93 imbalanced datasets** (90 real from `imbalanced-learn` + OpenML, 3 s
 sweeping the inspection budget *K*, we show that:
 
 1. **Precision@k cannot be a training loss** (piecewise-constant, zero gradient) — worked example included.
-2. As a **model-selection** metric it is *significantly worse* than log-loss or average precision
-   (paired Wilcoxon, p < 0.002, n = 322): selecting on the exact metric you care about yields a
-   *worse* held-out precision@k than selecting on a more stable proxy — the winner's curse.
+2. As a **model-selection** metric it is *significantly worse* than **average precision** —
+   in **all three model families** tested (gradient boosting, random forest, logistic regression),
+   paired Wilcoxon p ≤ 1.2e-3: selecting on the exact metric you care about yields a *worse*
+   held-out precision@k than selecting on a more stable proxy — the winner's curse. (Log-loss
+   is tied-best for gradient boosting but its edge is model-dependent; AUC is never better.)
 3. What governs selection difficulty is **not a ratio** (n_pos/K) but the **absolute number of true
    positives inside the budget** (≈ precision × K); its model-free proxy `min(K, n_pos)` is knowable a priori.
 
@@ -37,6 +39,7 @@ OpenML) and cached under `data_cache/` on first run.
 | `experiment_real3.py` | main experiment: train 40 LightGBM configs per dataset, sweep budget K, bootstrap model selection, record normalized regret per metric |
 | `meta_real3.py` | aggregation, paired Wilcoxon tests, and result figures |
 | `fig_apriori.py` | model-free `min(K, n_pos)` vs endogenous `precision × K` |
+| `experiment_families.py` / `meta_families.py` | robustness check with random forest + logistic regression |
 | `openml_candidates.csv` | the de-duplicated list of OpenML datasets used |
 | `results_real3.json` | per (dataset, K) results |
 | `paper/` | LaTeX source of the preprint |
