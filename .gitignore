@@ -21,3 +21,4 @@ paper/*.synctex.gz
 # unrelated large sub-project (separate benchmark study) — keep out of this repo
 benchmark/
 *.pkl
+tectonic
