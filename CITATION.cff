@@ -4,7 +4,7 @@ title: "Precision@k Is a Great Target and a Dangerous Judge: Model Selection for
 authors:
   - family-names: "Gómez Ruiz"
     given-names: "Alejandro"
-    affiliation: "Getronics"
+    affiliation: "Independent Researcher"
 repository-code: "https://github.com/alejandrogomez97/precision-at-k-model-selection"
 license: MIT
 year: 2026
