@@ -15,5 +15,6 @@ python fig_apriori.py             # -> figT6_apriori.png
 # robustness across model families (Random Forest + Logistic Regression)
 python experiment_families.py     # -> results_families.json
 python meta_families.py           # -> figF_families.png, families_summary.json
+python fig_families_by_count.py   # -> figG_families_by_count.png (regret vs count, per family)
 
-echo "Done. Figures: fig1_step_function.png, fig_gradient_example.png, figT0/figT2/figT5/figT6, figF_families.png"
+echo "Done. Figures: fig1_step_function.png, fig_gradient_example.png, figT0/figT2/figT5/figT6, figF_families.png, figG_families_by_count.png"
