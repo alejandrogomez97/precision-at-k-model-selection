@@ -319,10 +319,12 @@ to explicit top-$k$ surrogate training, is future work.
 
 \section{Conclusion}
 The metric you optimize and the metric you select with need not be the same. For fixed-budget
-top-$k$ problems, selecting on \emph{average precision} robustly beats selecting on the noisy
-target metric itself --- across 93 datasets and three model families --- and the deciding
-factor for how much any of this matters is a plain count, how many positives your budget will
-contain, not a ratio of rates.
+top-$k$ problems \emph{on imbalanced data} --- the regime studied here, and the one in which
+these problems arise --- selecting on \emph{average precision} robustly beats selecting on the
+noisy target metric itself, across 93 imbalanced datasets and three model families, and the
+deciding factor for how much any of this matters is a plain count, how many positives your
+budget will contain, not a ratio of rates. Whether the effect persists on
+near-balanced data, where the top-$k$ slice is less positive-starved, is left to future work.
 
 \paragraph{Reproducibility.} All code, the dataset list, and figures are released at
 \url{https://github.com/alejandrogomez97/precision-at-k-model-selection} and run from a fixed seed.
