@@ -54,18 +54,31 @@ budget, legal quota). The natural success metric is
 \end{equation}
 Such problems are ubiquitous (audits, marketing, triage, moderation, lead scoring).
 
-This paper makes three contributions. (i) We give a concrete, per-example account of why
-precision@$k$ cannot be a training loss for gradient-based learners
-(Section~\ref{sec:loss}). (ii) We show empirically, over 93 datasets and three model families, that precision@$k$ is
-also a poor \emph{model-selection} metric: average precision selects
-significantly better models on the very precision@$k$ objective, in every family
-(Section~\ref{sec:results}). This is an instance of the model-selection overfitting studied
-by \citet{cawley2010overfitting} and \citet{varma2006bias}, specialised to a high-variance
-top-$k$ metric. (iii) We characterise \emph{what} governs the choice: not a ratio of rates
-but the absolute number of positives inside the budget, whose a-priori proxy is
-$\min(K, n_{\text{pos}})$.
+As \emph{background}, we first recall the well-known reason precision@$k$ cannot be a
+\emph{training} loss for gradient-based learners --- it is piecewise-constant with a zero
+gradient --- and make it concrete with a worked gradient-boosting step (Section~\ref{sec:loss}).
+This is not a contribution; it is the setup. The interesting question is \emph{model selection},
+where precision@$k$ \emph{is} admissible (we only need to compute it, not differentiate it).
+Here the natural instinct is compelling: since we want the model with the highest
+\emph{test} precision@$k$, we should keep the model with the highest \emph{validation}
+precision@$k$. Our contributions are about whether that instinct holds.
 
-\section{Why precision@$k$ cannot be a training loss}\label{sec:loss}
+\textbf{(1)} Empirically, across 93 imbalanced datasets and three model families (gradient
+boosting, random forests, logistic regression), it does not: selecting by \emph{average
+precision} yields significantly better held-out precision@$k$ than selecting by
+precision@$k$ itself, in every family (Section~\ref{sec:results}).
+\textbf{(2)} We explain why. Precision@$k$ is estimated from only the $k$ scored items in the
+budget, so it is a high-variance selection criterion; taking the maximum over many
+configurations then overfits that noise --- the model-selection overfitting of
+\citet{cawley2010overfitting} and \citet{varma2006bias}, here specialised to a top-$k$ metric.
+Average precision and log-loss instead aggregate over the \emph{entire} validation set
+($n_{\text{val}}\gg k$ points), making them far more stable estimators; that stability
+outweighs their looser alignment with the top-$k$ target.
+\textbf{(3)} We characterise \emph{what} governs the trade-off: not a scale-free ratio such as
+$n_{\text{pos}}/K$, but the absolute number of true positives inside the budget, whose
+a-priori, model-free proxy $\min(K, n_{\text{pos}})$ is knowable before training.
+
+\section{Background: why precision@$k$ cannot be a training loss}\label{sec:loss}
 Precision@$k$ depends on the scores only through the \emph{set} of top-$k$ items. An
 infinitesimal change to any single score almost never changes that set, so the metric is
 locally constant and its gradient is zero almost everywhere; it changes only at
@@ -145,10 +158,17 @@ out of the budget --- better by log-loss, worse at the operational objective. On
 precision@$k$ detects this.
 
 \paragraph{Stability (against precision@$k$).} Precision@$k$ is a proportion estimated from
-$k$ items; its sampling variance is large. Selecting the maximum over many configurations on
-one validation set then partly selects noise --- the winner's curse
+only the $k$ items in the budget, so its standard error scales like
+$\sqrt{p(1-p)/k}$ --- it is a high-variance criterion. Selecting the maximum over many
+configurations on one validation set then partly selects noise --- the winner's curse
 \citep{cawley2010overfitting} --- so the chosen model generalises worse and the reported
-number is optimistically biased. Which force dominates is an empirical question.
+number is optimistically biased. Average precision and log-loss are, by contrast, aggregates
+over the \emph{whole} validation set: average precision integrates precision along the entire
+precision--recall curve \citep{davis2006prroc}, and log-loss averages a per-example term over
+all $n_{\text{val}}\gg k$ points. Their estimation error therefore shrinks with $n_{\text{val}}$,
+not with the tiny $k$, so they are far more stable selection criteria --- less aligned with the
+exact top-$k$ target, but much less prone to the winner's curse. Which force dominates is an
+empirical question.
 
 \section{Experimental protocol}\label{sec:protocol}
 \textbf{Datasets.} 90 real binary imbalanced datasets --- the full \texttt{imbalanced-learn}
