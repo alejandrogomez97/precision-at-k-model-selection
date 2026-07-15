@@ -393,6 +393,50 @@ labelled positives or a larger budget, not a cleverer metric. Finally, never quo
 validation precision@$k$ as expected production performance when the budget is positive-poor;
 report a nested/held-out estimate.
 
+\section{Beyond a single metric: a weighting view and a practical cascade}\label{sec:weights}
+Since no single metric is ideal, we ask two follow-up questions. \emph{Caveat:} both analyses
+below tune a choice on the test set, so their regret numbers are optimistic --- read them as an
+importance ranking and a qualitative recipe, not as achievable performance.
+
+\paragraph{How much should each metric count?} We standardise the four validation metrics
+within each case and select the configuration maximising a weighted sum
+$\sum_m w_m z(m)$, then search the weight simplex for the $w$ minimising mean test regret
+(Fig.~\ref{fig:weights}). Two things stand out. First, a \emph{blend} beats every single
+metric in all three families (e.g.\ pooled regret $0.64$ vs.\ $0.66$ for the best solo metric,
+average precision). Second, precision@$k$ receives little or zero weight (0\% pooled), average
+precision anchors the blend, and --- counter-intuitively --- ROC-AUC earns a large weight in
+the \emph{combination} despite being the worst metric \emph{alone}: it contributes signal that
+is decorrelated from the others. The message is not the exact weights (they are test-fit and
+family-dependent) but the ranking: do not lean on precision@$k$; build selection around stable
+ranking metrics.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\linewidth]{figs/figW_weights.png}
+\caption{Weights on the four validation metrics that minimise test regret, per family (and
+pooled). Fit on test, so optimistic --- an importance ranking, not a validated result.
+Precision@$k$ is never dominant; a blend beats any single metric.}
+\label{fig:weights}
+\end{figure}
+
+\paragraph{A robust cascade.} A safer, almost parameter-free strategy uses precision@$k$ the way
+our results suggest --- as a \emph{tie-breaker}, not a primary selector: shortlist the top-$n$
+configurations by validation average precision, then keep the one with the best validation
+precision@$k$ (Fig.~\ref{fig:cascade}). Here $n{=}1$ is pure average precision and $n{=}30$ is
+pure precision@$k$. A small shortlist ($n\approx3$) is at or below pure average precision and
+well below pure precision@$k$ in every family (pooled: $0.64$ at $n{=}3$ vs.\ $0.66$ for pure AP
+and $0.67$ for pure precision@$k$). This quantifies the practical rule: \textbf{select with
+average precision, and let precision@$k$ only break ties among already-strong models}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{figs/figX_cascade.png}
+\caption{Cascade strategy: shortlist by validation average precision, break ties by validation
+precision@$k$. A shortlist of $n\approx3$ beats both pure precision@$k$ ($n{=}30$) and pure
+average precision ($n{=}1$) in all three families.}
+\label{fig:cascade}
+\end{figure}
+
 \section{Limitations}
 We study three model families (gradient boosting, random forests, logistic regression) but a
 fixed model bank, isolating selection noise but not early stopping (where the same variance
