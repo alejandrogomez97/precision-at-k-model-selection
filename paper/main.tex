@@ -186,8 +186,16 @@ further families --- random forests and $L_2$-regularised logistic regression, $
 objective (log-loss for boosting and logistic regression, Gini impurity for random forests);
 precision@$k$ is never a training target, only an evaluation/selection metric.
 
-\textbf{Budget sweep.} We set $K$ to hit target ratios $n_{\text{pos}}/K \in
-\{0.25,0.5,1,2,4,8,16\}$, spanning budgets far larger and far smaller than the positive pool.
+\textbf{Budget sweep.} Throughout, $n_{\text{pos}}$ denotes the number of positives in the
+\emph{evaluation cohort} being ranked (the test split), \emph{not} the whole dataset --- in
+the fraud analogy, the test split is the monthly batch of installations, $n_{\text{pos}}$ is
+the frauds present in that batch, and $K$ is how many of them you can inspect. We set $K$ to
+hit target ratios $n_{\text{pos}}/K \in \{0.25,0.5,1,2,4,8,16\}$: a value of $16$ means the
+cohort contains $16\times$ more positives than the budget (a tiny budget --- the typical fraud
+regime), whereas $0.25$ means the budget is four times larger than \emph{all} the positives.
+This spans budgets far larger and far smaller than the positive pool. Note this ratio is
+distinct from the \emph{positives that land inside} the budget (which is at most $K$ and drives
+the results below); $n_{\text{pos}}/K$ compares the budget to the whole cohort's positive pool.
 
 \textbf{Selection under noise.} We bootstrap \citep{efron1994bootstrap} the validation set
 $120$ times; for each metric $m \in \{$precision@$k$, average precision (AP)
