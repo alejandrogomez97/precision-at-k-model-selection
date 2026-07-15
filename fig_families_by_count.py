@@ -40,7 +40,7 @@ for ax, fam in zip(axes, fams):
     for m in M3:
         ax.plot(xs, ser[m], "o-", color=COL[m], lw=2.2, ms=7, label=m)
     ax.set_xticks(list(xs))
-    ax.set_xticklabels([f"≈{v:.0f}\n({n} cases)" for v, n in zip(cen, ns)])
+    ax.set_xticklabels([f"≈{v:.0f}" for v in cen])
     ax.set_title(f"{LAB[fam]}  (N={len(info)})", fontsize=12)
     ax.set_xlabel("positives inside the budget (count)")
     ax.grid(alpha=0.25)
@@ -49,9 +49,11 @@ axes[2].legend(title="selection metric", loc="upper right")
 fig.suptitle("Same pattern in all three model families: as more positives land in the budget, regret falls —\n"
              "and average precision (green) stays at or below precision@k (red) throughout",
              fontsize=13, y=1.04)
-fig.text(0.5, -0.02, "Each x-axis split into 5 bins by the number of true positives in the top-K budget. "
-         "Tick top number (≈) = bin's typical count; \"cases\" = (dataset, budget K) combinations averaged.",
-         ha="center", fontsize=8.5, color="#666")
+fig.text(0.5, -0.03,
+         "How to read it:  → moving right = datasets where MORE true positives fall inside the top-K budget (≈4, ≈9, … positives).  "
+         "Each coloured line = a metric used to PICK the model; lower = it picked better models (less regret).  "
+         "Every dot averages one equal-size group of datasets (~55–70 dataset×budget cases) — the groups are equal in size, which is why moving right the positives grow but each dot rests on a similar amount of data.",
+         ha="center", fontsize=8, color="#555")
 fig.tight_layout()
 fig.savefig(f"{OUT}/figG_families_by_count.png", dpi=130, bbox_inches="tight")
 plt.close(fig)
