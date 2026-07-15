@@ -32,8 +32,9 @@ for ax,key,ttl in [
     ax.set_xlabel(key.replace("pos_in_budget","precision × K (count)").replace("minKN","min(K, n_pos)"))
     ax.grid(alpha=.25)
 a1.set_ylabel("mean normalized regret (lower better)"); a2.legend(title="metric",loc="upper right")
-fig.text(0.5,-0.02,"each point = mean regret over its bin;  n = number of cases (dataset × budget K) in the bin",
-         ha="center",fontsize=8.5,color="#666")
+fig.text(0.5,-0.02,"LightGBM. Datasets grouped into 6 equal-size bins along each x-axis; each dot = the mean regret of one bin.  "
+         "n = how many (dataset, budget K) cases fall in that bin.",
+         ha="center",fontsize=8,color="#666")
 rho=spearmanr(c(info,"pos_in_budget"),c(info,"minKN")).correlation
 fig.suptitle(f"You don't need the model to know if precision@K will be reliable:\n"
              f"the a-priori min(K, n_pos) tracks the true (endogenous) count almost perfectly (ρ = {rho:.2f})",

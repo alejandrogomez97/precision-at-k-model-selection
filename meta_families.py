@@ -41,12 +41,15 @@ w = 0.2; xb = np.arange(len(fams))
 for i, m in enumerate(SEL):
     vals = [summary[f]["metrics"][m]["mean"] for f in fams if f in summary]
     ax.bar(xb + (i - 1.5) * w, vals, w, color=COL[m], label=m, alpha=0.85)
-ax.set_xticks(xb); ax.set_xticklabels([f"{LAB[f]}\n(n={summary[f]['n']})" for f in fams if f in summary])
+ax.set_xticks(xb); ax.set_xticklabels([f"{LAB[f]}\n(n={summary[f]['n']} cases)" for f in fams if f in summary])
 ax.set_ylabel("mean normalized regret (lower better)")
-ax.set_title("Average precision beats precision@k in all three families (p<0.001)\n"
+ax.set_title("Average precision beats precision@k in all three model families (p<0.001)\n"
              "log-loss's edge is model-dependent; AUC is never better",
              fontsize=12)
 ax.grid(alpha=0.25, axis="y"); ax.legend(title="selection metric", ncol=4, loc="upper center")
+fig.text(0.5,-0.02,"Each bar = mean normalized regret when selecting the model by that metric (0 = best model in the bank, 1 = an average one).  "
+         "n = number of (dataset, budget K) cases per family.",
+         ha="center",fontsize=8,color="#666")
 fig.tight_layout(); fig.savefig(f"{OUT}/figF_families.png", dpi=130, bbox_inches="tight")
 plt.close(fig); print("saved figF_families.png")
 

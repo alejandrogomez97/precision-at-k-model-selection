@@ -46,9 +46,12 @@ ax.plot(range(len(SEL)),[np.mean([r[f"nregret_{m}"] for r in info]) for m in SEL
 ax.axhline(0,ls="--",color="gray",lw=1,label="oracle (0 = perfect)")
 ax.set_xticks(range(len(SEL))); ax.set_xticklabels(SEL); ax.set_ylim(-.05,1.7)
 ax.set_ylabel("normalized regret (0 = oracle, 1 = average model)"); ax.set_xlabel("metric used to select the model")
-ax.set_title(f"Model-selection regret across {ndat} datasets × up to 7 budgets ({len(info)} cases)\n"
+ax.set_title(f"Model-selection regret across {ndat} imbalanced datasets — LightGBM model bank\n"
              "log-loss and average precision tie for best; precision@K trails",fontsize=12)
 ax.grid(alpha=.25,axis="y"); ax.legend(loc="upper right")
+fig.text(0.5,-0.02,f"each small dot = one (dataset, budget K) case, N={len(info)};  box = 25-75th percentile, line = median, diamond = mean.  "
+         "Regret 0 = the metric picked the best model in the bank, 1 = as bad as an average model.",
+         ha="center",fontsize=8,color="#666")
 fig.tight_layout(); fig.savefig(f"{OUT}/figT0_overall.png",dpi=130,bbox_inches="tight"); plt.close(fig); print("saved figT0_overall.png")
 
 # ===== FIG 5: optimism vs count =====
@@ -58,8 +61,10 @@ ax.scatter(xx,yy,s=22,color="#c0392b",edgecolor="white",linewidth=.3); ax.set_xs
 lo=np.polyfit(np.log10(xx),yy,1); xr=np.logspace(np.log10(xx.min()),np.log10(xx.max()),50)
 ax.plot(xr,lo[0]*np.log10(xr)+lo[1],"--",color="#7d3c98",lw=2,label="trend")
 ax.set_xlabel("positives inside the budget (count, log scale)"); ax.set_ylabel("optimism of validation precision@K (%)")
-ax.set_title("Reported validation precision@K is inflated when few positives sit in the budget",fontsize=12)
+ax.set_title("Reported validation precision@K is inflated when few positives sit in the budget — LightGBM",fontsize=12)
 ax.grid(alpha=.25,which="both"); ax.legend()
+fig.text(0.5,-0.02,"each dot = one (dataset, budget K) case.  Optimism = (validation precision@K − true test precision@K) / true, in %.",
+         ha="center",fontsize=8,color="#666")
 fig.tight_layout(); fig.savefig(f"{OUT}/figT5_optimism.png",dpi=130,bbox_inches="tight"); plt.close(fig); print("saved figT5_optimism.png")
 
 def binned(rows,key,metrics,nb=6,logx=True):
@@ -99,8 +104,9 @@ for ax,cc,ss,nn,xl,ttl,rho in [
     rr=spearmanr(c(info,rho),mean_reg).correlation
     ax.set_title(f"{ttl}\n|ρ| with regret = {abs(rr):.2f}",fontsize=11); ax.set_xlabel(xl); ax.grid(alpha=.25)
 a1.set_ylabel("mean normalized regret (lower better)"); a2.legend(title="metric",loc="upper right")
-fig.text(0.5,-0.02,"each point = mean regret over its bin;  n = number of cases (dataset × budget K) in the bin",
-         ha="center",fontsize=8.5,color="#666")
+fig.text(0.5,-0.02,"LightGBM. Datasets are grouped into 6 equal-size bins along each x-axis; each dot = the mean regret of one bin.  "
+         "n = how many (dataset, budget K) cases fall in that bin.",
+         ha="center",fontsize=8,color="#666")
 fig.suptitle("The ratio does NOT decide it — the absolute count of positives in the budget does",fontsize=12.5,y=1.02)
 fig.tight_layout(); fig.savefig(f"{OUT}/figT2_ratio_vs_count.png",dpi=130,bbox_inches="tight"); plt.close(fig)
 print("saved figT2_ratio_vs_count.png")
