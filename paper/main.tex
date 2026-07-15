@@ -454,8 +454,11 @@ We study three model families (gradient boosting, random forests, logistic regre
 fixed model bank, isolating selection noise but not early stopping (where the same variance
 argument applies). Ground-truth precision@$k$ on small datasets is itself estimated with
 noise, mitigated by pooling and by robust statistics (rank, win-rate, signed-rank tests).
-Results are statements about \emph{expected} selected quality. Extending to deep models, and
-to explicit top-$k$ surrogate training, is future work.
+The Wilcoxon tests treat the $(\text{dataset}, K)$ cases as independent, but the up-to-seven
+budgets per dataset are correlated, so the $p$-values are likely anti-conservative; the effect
+directions are consistent across budgets and families, but a dataset-level aggregation would
+firm up the significance. Results are statements about \emph{expected} selected quality.
+Extending to deep models, and to explicit top-$k$ surrogate training, is future work.
 
 \section{Conclusion}
 The metric you optimize and the metric you select with need not be the same. For fixed-budget
