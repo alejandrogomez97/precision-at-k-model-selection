@@ -297,6 +297,19 @@ precision (green) is lowest in all three; log-loss (purple) leads only for gradi
 \label{fig:families}
 \end{figure}
 
+The count-driver result also transfers: Fig.~\ref{fig:families_count} reproduces, for each
+family, the fall of regret with the number of positives inside the budget, with average
+precision at or below precision@$k$ throughout.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figs/figG_families_by_count.png}
+\caption{Regret per selection metric versus the number of true positives inside the budget,
+one panel per model family. In all three, regret falls as the count grows and average
+precision (green) stays at or below precision@$k$ (red).}
+\label{fig:families_count}
+\end{figure}
+
 \section{Discussion and recommendations}
 Keep precision@$k$ as the target and the headline evaluation metric, but not as the training
 loss and not, by default, as the selection metric. For selection, \textbf{default to average
