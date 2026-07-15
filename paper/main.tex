@@ -92,6 +92,16 @@ for top-$k$ losses exist \citep{boyd2012accuracy,kar2015surrogate}, as does the 
 device of \emph{defining} metric-aware gradients \citep{burges2010ranknet}; for most systems
 the pragmatic recipe remains: train on log-loss, evaluate on precision@$k$.
 
+The zero-gradient argument is specific to \emph{gradient-based} learners (logistic and
+linear regression, neural networks, gradient boosting). Non-gradient learners such as
+decision trees and random forests fail to admit precision@$k$ as a training objective for a
+\emph{different} reason: they are grown by greedily optimising a \emph{local}, per-node
+impurity criterion (e.g.\ Gini), whereas precision@$k$ is a \emph{global}, ranking-based,
+$k$-dependent quantity that does not decompose into per-node gains. Either way, precision@$k$
+is used only for evaluation and selection; accordingly, in our experiments no model is
+trained on it (gradient boosting and logistic regression minimise log-loss, random forests
+minimise Gini impurity).
+
 \begin{table}[h]
 \centering
 \caption{One boosting step, budget $k=3$. Top-3 by score are $A,B,C$, so
