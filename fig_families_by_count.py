@@ -47,7 +47,7 @@ for ax, fam in zip(axes, fams):
 axes[0].set_ylabel("mean normalized regret (lower better)")
 axes[2].legend(title="selection metric", loc="upper right")
 fig.suptitle("Same pattern in all three model families: as more positives land in the budget, regret falls —\n"
-             "and average precision (green) stays at or below precision@k (red) throughout",
+             "and average precision (green) is at or below precision@k (red) in nearly every bin",
              fontsize=13, y=1.04)
 fig.text(0.5, -0.05,
          "How to read it:  → moving right = datasets where MORE true positives fall inside the top-K budget (the ≈ number).  "

@@ -95,7 +95,7 @@ ax.set_xticks(range(len(ns))); ax.set_xticklabels([f"top-{n}\nby AP" for n in ns
 ax.set_xlabel("keep the best validation precision@k among the top-n configs by validation AP")
 ax.set_ylabel("mean normalized regret (test)")
 ax.set_title("Cascade: AP to shortlist, precision@k to break ties\n"
-             "n=1 is pure AP; n=30 is pure precision@k", fontsize=11)
+             "n=1 is pure AP; large n lets precision@k decide (ties broken by AP)", fontsize=11)
 ax.grid(alpha=0.25); ax.legend()
 fig.tight_layout(); fig.savefig(f"{OUT}/figX_cascade.png", dpi=130, bbox_inches="tight"); plt.close(fig)
 print("saved figX_cascade.png")

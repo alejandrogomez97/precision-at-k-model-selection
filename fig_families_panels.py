@@ -74,4 +74,4 @@ make("minKN", "figI_families_by_apriori.png",
      lambda v: f"≈{v:.0f}",
      "How to read it:  x = min(budget K, number of positives you have) — knowable before training. Each line = a metric to pick the model; lower = better.  "
      "n under each tick = cases averaged (a \"case\" = one dataset at one budget K; the n's sum to N in each panel title, not 93).  "
-     "Regret falls monotonically as this grows, and average precision (green) stays at or below precision@k (red).")
+     "Regret falls as this grows (monotonically for the stable metrics; a small bump in precision@k), and average precision (green) stays at or below precision@k (red) in every bin.")
