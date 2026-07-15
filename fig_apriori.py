@@ -26,14 +26,14 @@ for ax,key,ttl in [
     (a2,"minKN","A-priori & model-free: min(K, n_pos)\n(the most positives that COULD land in the budget)")]:
     cen,ser,ns=binned(key); xs=range(len(cen))
     for m in M3: ax.plot(xs,ser[m],"o-",color=COL[m],lw=2.2,ms=7,label=m)
-    ax.set_xticks(list(xs)); ax.set_xticklabels([f"~{v:.0f}\n(n={n})" for v,n in zip(cen,ns)])
+    ax.set_xticks(list(xs)); ax.set_xticklabels([f"≈{v:.0f}\n({n} cases)" for v,n in zip(cen,ns)])
     rr=abs(spearmanr(c(info,key),mean_reg).correlation)
     ax.set_title(f"{ttl}\n|ρ| with regret = {rr:.2f}",fontsize=11)
     ax.set_xlabel(key.replace("pos_in_budget","precision × K (count)").replace("minKN","min(K, n_pos)"))
     ax.grid(alpha=.25)
 a1.set_ylabel("mean normalized regret (lower better)"); a2.legend(title="metric",loc="upper right")
-fig.text(0.5,-0.02,"LightGBM. Datasets grouped into 6 equal-size bins along each x-axis; each dot = the mean regret of one bin.  "
-         "n = how many (dataset, budget K) cases fall in that bin.",
+fig.text(0.5,-0.03,"LightGBM. Each x-axis is split into 6 bins. On every tick the top number (≈) is the bin's typical value; "
+         "\"cases\" is how many (dataset, budget K) combinations are averaged into that point.",
          ha="center",fontsize=8,color="#666")
 rho=spearmanr(c(info,"pos_in_budget"),c(info,"minKN")).correlation
 fig.suptitle(f"You don't need the model to know if precision@K will be reliable:\n"
