@@ -23,8 +23,9 @@ In many operational problems --- energy-fraud inspection, tax audits, retention
 campaigns, medical call-backs --- a model ranks a population and a team acts only on the
 top $k$, where $k$ is a fixed external budget. The natural objective is
 \emph{precision@$k$}. It is well known that precision@$k$ cannot serve as a training loss
-because it is piecewise-constant and non-differentiable; we make the mechanism concrete
-with a worked gradient-boosting step. We then ask a less-examined question: should
+for gradient-based learners, because it is piecewise-constant and non-differentiable (and, for
+tree ensembles, because it does not decompose into per-node gains); we make the mechanism
+concrete with a worked gradient-boosting step. We then ask a less-examined question: should
 precision@$k$ be the metric used for \emph{model selection}? Across 93 imbalanced datasets
 (90 real, 3 synthetic) with the budget $K$ swept over two orders of magnitude, and across
 three model families (gradient boosting, random forests, logistic regression), we find that
