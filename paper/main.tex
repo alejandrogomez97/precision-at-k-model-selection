@@ -394,9 +394,12 @@ validation precision@$k$ as expected production performance when the budget is p
 report a nested/held-out estimate.
 
 \section{Beyond a single metric: a weighting view and a practical cascade}\label{sec:weights}
-Since no single metric is ideal, we ask two follow-up questions. \emph{Caveat:} both analyses
-below tune a choice on the test set, so their regret numbers are optimistic --- read them as an
-importance ranking and a qualitative recipe, not as achievable performance.
+Since no single metric is ideal, we ask two follow-up questions. This is a separate,
+smaller-scale analysis ($C=30$ configurations, datasets subsampled to $15$k, metrics on the
+full validation set with no bootstrap), so its absolute regrets are \emph{not} comparable to
+the tables above --- only comparisons \emph{within} it are meaningful. \emph{Caveat:} both
+analyses below tune a choice on the test set, so their regret numbers are optimistic --- read
+them as an importance ranking and a qualitative recipe, not as achievable performance.
 
 \paragraph{How much should each metric count?} We standardise the four validation metrics
 within each case and select the configuration maximising a weighted sum
@@ -422,11 +425,15 @@ Precision@$k$ is never dominant; a blend beats any single metric.}
 \paragraph{A robust cascade.} A safer, almost parameter-free strategy uses precision@$k$ the way
 our results suggest --- as a \emph{tie-breaker}, not a primary selector: shortlist the top-$n$
 configurations by validation average precision, then keep the one with the best validation
-precision@$k$ (Fig.~\ref{fig:cascade}). Here $n{=}1$ is pure average precision and $n{=}30$ is
-pure precision@$k$. A small shortlist ($n\approx3$) is at or below pure average precision and
-well below pure precision@$k$ in every family (pooled: $0.64$ at $n{=}3$ vs.\ $0.66$ for pure AP
-and $0.67$ for pure precision@$k$). This quantifies the practical rule: \textbf{select with
-average precision, and let precision@$k$ only break ties among already-strong models}.
+precision@$k$ (Fig.~\ref{fig:cascade}). Here $n{=}1$ is pure average precision and large $n$
+lets precision@$k$ decide. A small shortlist ($n\approx3$) is at or below pure average precision
+and below the precision@$k$-dominated end in every family (pooled: $0.64$ at $n{=}3$ vs.\ $0.66$
+for pure average precision at $n{=}1$ and $0.67$ at $n{=}30$). A relevant subtlety: precision@$k$
+takes only discrete values (multiples of $1/K$), so many configurations tie on it --- selecting
+by precision@$k$ alone is under-determined, and \emph{how} you break those ties matters (breaking
+them arbitrarily is worse still). The cascade resolves them with the stable metric, which is
+exactly why it helps. This quantifies the practical rule: \textbf{select with average precision,
+and let precision@$k$ only break ties among already-strong models}.
 
 \begin{figure}[h]
 \centering
