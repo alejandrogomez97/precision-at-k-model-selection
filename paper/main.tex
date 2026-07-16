@@ -397,13 +397,35 @@ labelled positives or a larger budget, not a cleverer metric. Finally, never quo
 validation precision@$k$ as expected production performance when the budget is positive-poor;
 report a nested/held-out estimate.
 
-\section{Beyond a single metric: a weighting view and a practical cascade}\label{sec:weights}
-Since no single metric is ideal, we ask two follow-up questions. This is a separate,
-smaller-scale analysis ($C=30$ configurations, datasets subsampled to $15$k, metrics on the
-full validation set with no bootstrap), so its absolute regrets are \emph{not} comparable to
-the tables above --- only comparisons \emph{within} it are meaningful. \emph{Caveat:} both
-analyses below tune a choice on the test set, so their regret numbers are optimistic --- read
-them as an importance ranking and a qualitative recipe, not as achievable performance.
+\section{Is there an optimal way to select from these metrics?}\label{sec:weights}
+We have seen that average precision (and, for boosting, log-loss) selects better models than
+precision@$k$ even though precision@$k$ is the deployment objective. Can we do better still by
+\emph{combining} the four validation metrics? This section searches for such a rule and, more
+importantly, for a \emph{ceiling} on how well any rule can do. It is a separate, smaller-scale
+analysis ($C=30$ configurations, datasets subsampled to $15$k, metrics on the full validation
+set, no bootstrap), so its absolute regrets are \emph{not} comparable to the tables above ---
+only comparisons \emph{within} it are meaningful. \emph{Caveat:} the weighting and cascade tune a
+choice on the test set, so their regret numbers are optimistic; read them as qualitative recipes.
+
+\paragraph{A ceiling: the winner is hard to find from validation.} Before combining metrics,
+ask how well any of them \emph{could} work. For each case we locate the configuration with the
+best \emph{test} precision@$k$ (the oracle) and record its percentile in each \emph{validation}
+ranking (Fig.~\ref{fig:oracle_pct}). The answer is sobering: the test-winner sits only in the
+mid-to-upper range of every validation metric --- median percentile $\approx$ 67 (precision@$k$),
+68 (AP), 68 (AUC), 58 (log-loss) --- and is widely spread, frequently landing below the median.
+\emph{No} validation metric reliably puts the true winner near the top; average precision and
+AUC do so marginally better than precision@$k$ and log-loss, consistent with the earlier results,
+but the effect is small. This is why selection regret plateaus around the same level whatever
+metric or combination we use: the information simply is not there in a single validation split.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.88\linewidth]{figs/figY_oracle_percentile.png}
+\caption{Percentile of the test-best model within each validation-metric ranking, across all
+cases ($100$ = top of the validation ranking). The winner is only mid-to-upper and widely
+spread in every metric --- a ceiling on what any selection rule can achieve.}
+\label{fig:oracle_pct}
+\end{figure}
 
 \paragraph{How much should each metric count?} We standardise the four validation metrics
 within each case and select the configuration maximising a weighted sum
@@ -452,6 +474,37 @@ precision@$k$. A shortlist of $n\approx3$ beats both the precision@$k$-dominated
 average precision ($n{=}1$) in all three families.}
 \label{fig:cascade}
 \end{figure}
+
+\paragraph{Do fancier combinations help? Barely.} We also tried rank-based combinations
+(selecting the configuration with the best sum, or the best minimum, of validation percentile
+ranks across metrics). Table~\ref{tab:rules} collects them. Two conclusions. First, any rule
+that \emph{combines average precision with precision@$k$} --- the top-$3$ cascade, or the
+AP$+$precision@$k$ rank-sum --- edges out pure average precision and clearly beats pure
+precision@$k$, so there is a mild ``sweet spot'' in being high on \emph{both}. Second, the gains
+are small and no rule wins in every family (rank-min is best for random forests, the cascade for
+logistic regression, the AP$+$precision@$k$ rank-sum for LightGBM), exactly as the ceiling in
+Fig.~\ref{fig:oracle_pct} predicts. The practical takeaway is unchanged and robust: \textbf{rank
+by average precision, use precision@$k$ to break ties among the strongest few} --- and don't
+expect a magic combination, because the winner is not identifiable from one validation split.
+
+\begin{table}[h]
+\centering
+\caption{Mean normalized regret (lower better) of selection rules built from the four validation
+metrics. Combining average precision with precision@$k$ (cascade or rank-sum) is the sweet spot,
+but improvements over pure average precision are small. Test-tuned, so optimistic.}
+\label{tab:rules}
+\begin{tabular}{lcccc}
+\toprule
+selection rule & LightGBM & random forest & logistic reg. & pooled \\
+\midrule
+pure precision@$k$              & 0.709 & 0.670 & 0.711 & 0.696 \\
+pure average precision          & 0.700 & 0.675 & 0.584 & 0.656 \\
+cascade: top-3 AP $\to$ P@$k$   & 0.680 & 0.659 & \textbf{0.578} & \textbf{0.641} \\
+rank-sum AP $+$ P@$k$           & \textbf{0.663} & 0.671 & 0.616 & 0.652 \\
+rank-min(AP, P@$k$)             & 0.673 & \textbf{0.655} & 0.655 & 0.661 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Limitations}
 We study three model families (gradient boosting, random forests, logistic regression) but a

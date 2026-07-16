@@ -21,3 +21,4 @@ python experiment_weights.py     # -> results_weights.json (per-config val metri
 python analysis_weights.py        # -> figW_weights.png, figX_cascade.png, weights_summary.json
 
 echo "Done. Figures: fig1_step_function.png, fig_gradient_example.png, figT0/figT2/figT5/figT6, figF_families.png, figG_families_by_count.png"
+python analysis_sweetspot.py       # -> figY_oracle_percentile.png, sweetspot_summary.json
