@@ -80,8 +80,8 @@ for i, m in enumerate(METRICS):
     ax.bar(xb + (i - 1.5) * w, vals, w, color=COL[m], label=NICE[m], alpha=0.85)
 ax.set_xticks(xb); ax.set_xticklabels([LAB.get(f, "Pooled") for f in labels])
 ax.set_ylabel("weight that minimises test regret (%)")
-ax.set_title("Which validation metric should count most, to pick the best precision@k model?\n"
-             "(weights fit on test — an approximate importance ranking, not a validated result)", fontsize=11)
+ax.set_title("A blend beats any single metric — but the exact weights are NOT identifiable\n"
+             "(the four metrics are correlated and the optimum is flat; fit on test). Read only: don't rely on precision@k alone.", fontsize=10)
 ax.grid(alpha=0.25, axis="y"); ax.legend(ncol=4, loc="upper center")
 fig.tight_layout(); fig.savefig(f"{OUT}/figW_weights.png", dpi=130, bbox_inches="tight"); plt.close(fig)
 print("\nsaved figW_weights.png")

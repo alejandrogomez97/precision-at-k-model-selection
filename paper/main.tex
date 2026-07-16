@@ -408,22 +408,26 @@ them as an importance ranking and a qualitative recipe, not as achievable perfor
 \paragraph{How much should each metric count?} We standardise the four validation metrics
 within each case and select the configuration maximising a weighted sum
 $\sum_m w_m z(m)$, then search the weight simplex for the $w$ minimising mean test regret
-(Fig.~\ref{fig:weights}). Two things stand out. First, a \emph{blend} beats every single
-metric in all three families (e.g.\ pooled regret $0.64$ vs.\ $0.66$ for the best solo metric,
-average precision). Second, the blend leans on the stable ranking metrics: pooled, the weights
-are ROC-AUC $0.4$, average precision $0.3$, log-loss $0.3$, and precision@$k$ $0$; and ---
-counter-intuitively --- ROC-AUC earns a large weight in the \emph{combination} despite being
-the worst metric \emph{alone}, contributing signal decorrelated from the others. Precision@$k$
-is never the largest weight in any family (at most $0.3$, in LightGBM). The message is not the
-exact weights (they are test-fit and family-dependent) but the ranking: do not lean on
-precision@$k$; build selection around stable ranking metrics.
+(Fig.~\ref{fig:weights}). One robust fact emerges: a \emph{blend} beats every single metric in
+all three families (e.g.\ pooled regret $0.64$ vs.\ $0.66$ for the best solo metric). \emph{The
+individual weights, however, are not identifiable and should not be read literally.} The four
+metrics are strongly correlated (pairwise Pearson $0.45$--$0.73$ across configurations --- they
+all reward ranking positives high), so they are near-substitutes and the optimal weight can
+shift between them with almost no effect; and the regret surface is nearly flat --- for
+LightGBM, $11$ of $286$ grid weightings lie within $0.01$ of the optimum, ranging from
+AUC-heavy $[0.3,0.1,0.5,0.1]$ to precision@$k$-heavy $[0.8,0,0.1,0.1]$ to log-loss-heavy
+$[0.2,0,0.3,0.5]$. So the per-family split in Fig.~\ref{fig:weights} is largely test-fit noise.
+The one defensible reading is qualitative: do not rely on precision@$k$ alone; a combination of
+stable ranking metrics is marginally better, and (next) a simple cascade captures that
+robustly.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.9\linewidth]{figs/figW_weights.png}
 \caption{Weights on the four validation metrics that minimise test regret, per family (and
-pooled). Fit on test, so optimistic --- an importance ranking, not a validated result.
-Precision@$k$ is never dominant; a blend beats any single metric.}
+pooled). Fit on test and \emph{not identifiable} --- the metrics are correlated and the
+optimum is flat, so the exact split is largely noise (see text). The only robust reading: a
+blend beats any single metric and precision@$k$ is not the answer alone.}
 \label{fig:weights}
 \end{figure}
 
