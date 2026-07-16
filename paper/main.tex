@@ -423,6 +423,22 @@ deciding factor for how much any of this matters is a plain count, how many posi
 budget will contain, not a ratio of rates. Whether the effect persists on
 near-balanced data, where the top-$k$ slice is less positive-starved, is left to future work.
 
+\paragraph{Why, intuitively.} Recall the two competing forces. The case \emph{for}
+precision@$k$ is a model that is genuinely better on the top $k$ while worse further down ---
+a specialist that, say, nails one fraud type at the expense of the rest. If such a model is
+among your candidates, precision@$k$ (in both validation \emph{and} test) is what would surface
+it, and selecting by it would be exactly right. Our results say such models exist but are
+\emph{the exception, not the rule}. In the large majority of cases the model that ranks better
+\emph{overall} --- the one average precision favours --- is also the one that captures the most
+true positives in the top $k$ \emph{on test}, even when, on a finite and noisy validation
+sample, some other model happened to post a higher validation precision@$k$. Being better at
+ranking in general usually implies being better at the very top too; a model that beats the
+better overall ranker \emph{specifically} on the top $k$, and does so reliably rather than by
+sampling luck, is the special case. Hence the general winning strategy is to select by average
+precision. Deviating to precision@$k$ is warranted only when you understand your problem well
+enough to expect such a specialist \emph{and} can confirm its top-$k$ edge is real, not an
+artefact of one validation split --- otherwise you are simply selecting on noise.
+
 \paragraph{Reproducibility.} All code, the dataset list, and figures are released at
 \url{https://github.com/alejandrogomez97/precision-at-k-model-selection} and run from a fixed seed.
 
