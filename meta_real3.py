@@ -5,7 +5,7 @@ from scipy.stats import spearmanr, wilcoxon
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 OUT="/home/agomez/proyectos/precision-at-k-study"
 COL={"P@K":"#c0392b","AP":"#27ae60","AUC":"#2471a3","logloss":"#7d3c98"}
-SEL=["P@K","AP","AUC","logloss"]; M3=["P@K","AP","logloss"]
+SEL=["P@K","AP","AUC","logloss"]; M3=["P@K","AP","AUC","logloss"]
 R=json.load(open(f"{OUT}/results_real3.json"))
 info=[r for r in R if (r["oracle"]-r["meancfg"])>=0.02]
 ndat=len(set(r["name"] for r in R))

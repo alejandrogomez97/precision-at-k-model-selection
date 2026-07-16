@@ -4,8 +4,8 @@ import json, numpy as np
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 
 OUT = "/home/agomez/proyectos/precision-at-k-study"
-COL = {"P@K": "#c0392b", "AP": "#27ae60", "logloss": "#7d3c98"}
-M3 = ["P@K", "AP", "logloss"]
+COL = {"P@K": "#c0392b", "AP": "#27ae60", "AUC": "#2471a3", "logloss": "#7d3c98"}
+M3 = ["P@K", "AP", "AUC", "logloss"]
 LAB = {"lightgbm": "LightGBM", "rf": "Random Forest", "logreg": "Logistic Regression"}
 
 # gather rows per family

@@ -4,7 +4,7 @@ import json, numpy as np
 from scipy.stats import spearmanr
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 OUT="/home/agomez/proyectos/precision-at-k-study"
-COL={"P@K":"#c0392b","AP":"#27ae60","logloss":"#7d3c98"}; M3=["P@K","AP","logloss"]
+COL={"P@K":"#c0392b","AP":"#27ae60","AUC":"#2471a3","logloss":"#7d3c98"}; M3=["P@K","AP","AUC","logloss"]
 R=json.load(open(f"{OUT}/results_real3.json"))
 info=[r for r in R if (r["oracle"]-r["meancfg"])>=0.02]
 for r in info: r["minKN"]=min(r["K"],r["n_pos"])
