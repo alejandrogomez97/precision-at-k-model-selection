@@ -306,7 +306,13 @@ model-dependent, whereas average precision's is robust.
 \centering
 \caption{Robustness across model families. Mean normalized regret (lower is better) and
 paired Wilcoxon $p$-value versus precision@$k$. Average precision is significantly better than
-precision@$k$ in every family; log-loss only for LightGBM; ROC-AUC never.}
+precision@$k$ in every family; log-loss only for LightGBM; ROC-AUC never. $n$ is the number of
+\emph{informative} cases per family.\footnote{All three families use the same 93 datasets and a
+near-identical number of raw (dataset, budget) cases ($625$/$623$/$623$); $n$ counts only the
+\emph{informative} ones --- those where the best model beats the average by $\ge 0.02$, so there
+is something to select. Fewer pass for logistic regression ($288$ vs.\ $329$ for random forests,
+which share the identical experimental setup) because its less diverse model bank produces
+smaller oracle-vs-average gaps.}}
 \label{tab:families}
 \begin{tabular}{lcccc}
 \toprule
