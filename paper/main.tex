@@ -157,10 +157,11 @@ are subsampled to $30$k rows.
 
 \textbf{Model bank.} Per dataset we split $50/25/25$ (train/validation/test, stratified) and
 train a bank of $C$ configurations with random hyperparameters. The main study uses $C=40$
-LightGBM \citep{ke2017lightgbm} configurations (trained on log-loss); to show the conclusion is
-not learner-specific, Section~\ref{sec:results} repeats the \emph{entire} protocol with two
-further families --- random forests and $L_2$-regularised logistic regression, $C=25$ each
-(scikit-learn \citep{pedregosa2011scikit}). Each learner is trained with its own standard
+LightGBM \citep{ke2017lightgbm} configurations (trained on log-loss, datasets capped at $30$k
+rows as above); to show the conclusion is not learner-specific, Section~\ref{sec:results}
+repeats the \emph{entire} protocol with two further families --- random forests and
+$L_2$-regularised logistic regression, $C=25$ each and datasets capped at $15$k rows (to bound
+the cost of the slower learners), using scikit-learn \citep{pedregosa2011scikit}. Each learner is trained with its own standard
 objective (log-loss for boosting and logistic regression, Gini impurity for random forests);
 precision@$k$ is never a training target, only an evaluation/selection metric.
 
