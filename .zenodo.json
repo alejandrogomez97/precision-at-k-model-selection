@@ -1,0 +1,21 @@
+{
+  "title": "Precision@k Is a Great Target and a Dangerous Judge: Model Selection for Fixed-Budget Top-k Problems",
+  "description": "Across 93 imbalanced datasets (90 real from imbalanced-learn and OpenML, 3 synthetic) and three model families (gradient boosting, random forests, logistic regression), we show that selecting a model by validation average precision yields significantly better held-out precision@k than selecting by precision@k itself (paired Wilcoxon p<1.2e-3 in every family) - optimizing selection for the exact target metric is a losing move (the winner's curse). Selection difficulty is governed not by a scale-free ratio (n_pos/K) but by the absolute count of true positives in the budget, whose model-free proxy min(K, n_pos) is knowable before training. Includes the full reproducible pipeline and the LaTeX preprint.",
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "access_right": "open",
+  "license": "CC-BY-4.0",
+  "creators": [
+    { "name": "Gómez Ruiz, Alejandro" }
+  ],
+  "keywords": [
+    "model selection",
+    "precision at k",
+    "imbalanced classification",
+    "winner's curse",
+    "fixed-budget top-k",
+    "average precision",
+    "fraud detection",
+    "machine learning"
+  ]
+}
