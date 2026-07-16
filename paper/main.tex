@@ -97,55 +97,16 @@ gradient.}
 \label{fig:step}
 \end{figure}
 
-Table~\ref{tab:grad} makes it concrete for $k=3$. For log-loss with a sigmoid, the gradient
-w.r.t.\ each logit is $p-y$: false positives ranked high get large positive gradients
-(``push down''), missed positives get negative gradients (``push up''). Every row receives a
-signed instruction. Precision@3, by contrast, gives zero for every row: a helpful
-move (lifting $D$ above $C$, changing the top-3 to $\{A,B,D\}$ and precision@3 from
-$1/3$ to $2/3$) is a \emph{finite} jump the gradient cannot see. Differentiable surrogates
-for top-$k$ losses exist \citep{boyd2012accuracy,kar2015surrogate}, as does the LambdaMART
-device of \emph{defining} metric-aware gradients \citep{burges2010ranknet}; for most systems
-the pragmatic recipe remains: train on log-loss, evaluate on precision@$k$.
-
-The zero-gradient argument is specific to \emph{gradient-based} learners (logistic and
-linear regression, neural networks, gradient boosting). Non-gradient learners such as
-decision trees and random forests fail to admit precision@$k$ as a training objective for a
-\emph{different} reason: they are grown by greedily optimising a \emph{local}, per-node
-impurity criterion (e.g.\ Gini), whereas precision@$k$ is a \emph{global}, ranking-based,
-$k$-dependent quantity that does not decompose into per-node gains. Either way, precision@$k$
-is used only for evaluation and selection; accordingly, in our experiments no model is
-trained on it (gradient boosting and logistic regression minimise log-loss, random forests
-minimise Gini impurity).
-
-\begin{table}[H]
-\centering
-\caption{One boosting step, budget $k=3$. Top-3 by score are $A,B,C$, so
-precision@3 $=1/3$. Log-loss gradient $=p-y$; precision@3 gradient $=0$ everywhere.}
-\label{tab:grad}
-\begin{tabular}{ccccc}
-\toprule
-item & score $p$ & label $y$ & log-loss grad.\ $(p-y)$ & precision@3 grad.\ \\
-\midrule
-A & 0.92 & fraud (1) & $-0.08$ & 0 \\
-B & 0.85 & legit (0) & $+0.85$ & 0 \\
-C & 0.80 & legit (0) & $+0.80$ & 0 \\
-D & 0.78 & fraud (1) & $-0.22$ & 0 \\
-E & 0.60 & fraud (1) & $-0.40$ & 0 \\
-F & 0.55 & legit (0) & $+0.55$ & 0 \\
-G & 0.30 & fraud (1) & $-0.70$ & 0 \\
-H & 0.10 & legit (0) & $+0.10$ & 0 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/fig_gradient_example.png}
-\caption{The same step visualised. Right: log-loss assigns a direction to every row;
-precision@3 assigns zero. Note log-loss already pushes $C$ down and $D$ up --- the swap
-that would raise precision@3.}
-\label{fig:grad}
-\end{figure}
+For log-loss with a sigmoid the gradient w.r.t.\ each score is simply $p-y$, giving every
+example a signed update; precision@$k$, by contrast, has gradient exactly zero everywhere
+(the one helpful move --- pushing a positive across the cutoff --- is a finite jump the
+gradient cannot see). Gradient-based learners (logistic/linear regression, neural networks,
+gradient boosting) therefore cannot optimise it, and tree ensembles cannot either --- for a
+different reason: it is a global, ranking-based, $k$-dependent quantity that does not decompose
+into the local per-node impurity gains a tree greedily optimises. Differentiable top-$k$
+surrogates exist \citep{boyd2012accuracy,kar2015surrogate,burges2010ranknet}, but the standard
+recipe --- which we follow --- is to train on a proper loss (log-loss, or Gini impurity for
+forests) and reserve precision@$k$ for evaluation and selection.
 
 \section{Precision@$k$ as a selection metric: two opposing forces}\label{sec:selection}
 Evaluation --- early stopping and choosing among trained configurations --- only requires
@@ -405,8 +366,7 @@ precision@$k$ even though precision@$k$ is the deployment objective. Can we do b
 importantly, for a \emph{ceiling} on how well any rule can do. It is a separate, smaller-scale
 analysis ($C=30$ configurations, datasets subsampled to $15$k, metrics on the full validation
 set, no bootstrap), so its absolute regrets are \emph{not} comparable to the tables above ---
-only comparisons \emph{within} it are meaningful. \emph{Caveat:} the weighting and cascade tune a
-choice on the test set, so their regret numbers are optimistic; read them as qualitative recipes.
+only comparisons \emph{within} it are meaningful.
 
 \paragraph{A ceiling: the winner is hard to find from validation.} Before combining metrics,
 ask how well any of them \emph{could} work. For each case we locate the configuration with the
@@ -428,84 +388,20 @@ spread in every metric --- a ceiling on what any selection rule can achieve.}
 \label{fig:oracle_pct}
 \end{figure}
 
-\paragraph{How much should each metric count?} We standardise the four validation metrics
-within each case and select the configuration maximising a weighted sum
-$\sum_m w_m z(m)$, then search the weight simplex for the $w$ minimising mean test regret
-(Fig.~\ref{fig:weights}). One robust fact emerges: a \emph{blend} beats every single metric in
-all three families (e.g.\ pooled regret $0.64$ vs.\ $0.66$ for the best solo metric). \emph{The
-individual weights, however, are not identifiable and should not be read literally.} The four
-metrics are strongly correlated (pairwise Pearson $0.45$--$0.73$ across configurations --- they
-all reward ranking positives high), so they are near-substitutes and the optimal weight can
-shift between them with almost no effect; and the regret surface is nearly flat --- for
-LightGBM, $11$ of $286$ grid weightings lie within $0.01$ of the optimum, ranging from
-AUC-heavy $[0.3,0.1,0.5,0.1]$ to precision@$k$-heavy $[0.8,0,0.1,0.1]$ to log-loss-heavy
-$[0.2,0,0.3,0.5]$. So the per-family split in Fig.~\ref{fig:weights} is largely test-fit noise.
-The one defensible reading is qualitative: do not rely on precision@$k$ alone; a combination of
-stable ranking metrics is marginally better, and (next) a simple cascade captures that
-robustly.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\linewidth]{figs/figW_weights.png}
-\caption{Weights on the four validation metrics that minimise test regret, per family (and
-pooled). Fit on test and \emph{not identifiable} --- the metrics are correlated and the
-optimum is flat, so the exact split is largely noise (see text). The only robust reading: a
-blend beats any single metric and precision@$k$ is not the answer alone.}
-\label{fig:weights}
-\end{figure}
-
-\paragraph{A robust cascade.} A safer, almost parameter-free strategy uses precision@$k$ the way
-our results suggest --- as a \emph{tie-breaker}, not a primary selector: shortlist the top-$n$
-configurations by validation average precision, then keep the one with the best validation
-precision@$k$ (Fig.~\ref{fig:cascade}). Here $n{=}1$ is pure average precision and large $n$
-lets precision@$k$ decide. A small shortlist ($n\approx3$) is at or below pure average precision
-and below the precision@$k$-dominated end in every family (pooled: $0.64$ at $n{=}3$ vs.\ $0.66$
-for pure average precision at $n{=}1$ and $0.67$ at $n{=}30$). A relevant subtlety: precision@$k$
-takes only discrete values (multiples of $1/K$), so many configurations tie on it --- selecting
-by precision@$k$ alone is under-determined, and \emph{how} you break those ties matters (breaking
-them arbitrarily is worse still). The cascade resolves them with the stable metric, which is
-exactly why it helps. This quantifies the practical rule: \textbf{select with average precision,
-and let precision@$k$ only break ties among already-strong models}.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\linewidth]{figs/figX_cascade.png}
-\caption{Cascade strategy: shortlist by validation average precision, break ties by validation
-precision@$k$. A shortlist of $n\approx3$ beats both the precision@$k$-dominated end ($n{=}30$) and pure
-average precision ($n{=}1$) in all three families.}
-\label{fig:cascade}
-\end{figure}
-
-\paragraph{Do fancier combinations help? Barely.} We also tried rank-based combinations
-(selecting the configuration with the best sum, or the best minimum, of validation percentile
-ranks across metrics). Table~\ref{tab:rules} collects them. Two conclusions. First, any rule
-that \emph{combines average precision with precision@$k$} --- the top-$3$ cascade, or the
-AP$+$precision@$k$ rank-sum --- edges out pure average precision and clearly beats pure
-precision@$k$, so there is a mild ``sweet spot'' in being high on \emph{both}. Second, the gains
-are small and no rule wins in every family (rank-min is best for random forests, the cascade for
-logistic regression, the AP$+$precision@$k$ rank-sum for LightGBM), exactly as the ceiling in
-Fig.~\ref{fig:oracle_pct} predicts. The practical takeaway is unchanged and robust: \textbf{rank
-by average precision, use precision@$k$ to break ties among the strongest few} --- and don't
-expect a magic combination, because the winner is not identifiable from one validation split.
-
-\begin{table}[H]
-\centering
-\caption{Mean normalized regret (lower better) of selection rules built from the four validation
-metrics. Combining average precision with precision@$k$ (cascade or rank-sum) is the sweet spot,
-but improvements over pure average precision are small. Test-tuned, so optimistic.}
-\label{tab:rules}
-\begin{tabular}{lcccc}
-\toprule
-selection rule & LightGBM & random forest & logistic reg. & pooled \\
-\midrule
-pure precision@$k$              & 0.709 & 0.670 & 0.711 & 0.696 \\
-pure average precision          & 0.700 & 0.675 & 0.584 & 0.656 \\
-cascade: top-3 AP $\to$ P@$k$   & 0.680 & 0.659 & \textbf{0.578} & \textbf{0.641} \\
-rank-sum AP $+$ P@$k$           & \textbf{0.663} & 0.671 & 0.616 & 0.652 \\
-rank-min(AP, P@$k$)             & 0.673 & \textbf{0.655} & 0.655 & 0.661 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\paragraph{Can a combination do better? Only marginally, and not reliably.} We searched for a
+better rule --- weighting the four standardised metrics, and rank-based combinations (best sum,
+or best minimum, of validation percentile ranks). Consistent with the ceiling, none helps much.
+The weighted-sum optimum is not even identifiable: the metrics are strongly correlated (pairwise
+Pearson $0.45$--$0.73$), so the weights are near-interchangeable and the regret surface is flat
+(for LightGBM, $11$ of $286$ grid weightings lie within $0.01$ of the optimum, ranging from
+AUC-heavy to precision@$k$-heavy). The only improvement that survives a proper check --- choosing
+the rule's hyperparameter on held-out \emph{datasets} (5-fold over datasets) and evaluating on the
+rest --- is small: shortlisting the top few configurations by average precision and breaking ties
+with precision@$k$ gives held-out regret $0.643$ versus $0.651$ for pure average precision (better
+in 4 of 5 folds). The practical recommendation is therefore modest and robust: \textbf{rank by
+average precision and use precision@$k$ only to break ties among the strongest few} --- and do not
+expect a combination to rescue you, because the winner is not identifiable from a single validation
+split (Fig.~\ref{fig:oracle_pct}).
 
 \section{Limitations}
 We study three model families (gradient boosting, random forests, logistic regression) but a
