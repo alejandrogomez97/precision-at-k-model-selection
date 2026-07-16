@@ -146,7 +146,11 @@ empirical question.
 \section{Experimental protocol}\label{sec:protocol}
 \textbf{Datasets.} 90 real binary imbalanced datasets --- the \texttt{imbalanced-learn}
 benchmark \citep{lemaitre2017imblearn} (21 of its 27 datasets pass our minimum-positives
-filter) plus a de-duplicated pull from OpenML \citep{vanschoren2014openml} (fraud, credit
+filter\footnote{We require at least 12 positives in each of the train/validation/test splits
+so precision@$k$ is measurable; this drops six very small sets (\texttt{ecoli},
+\texttt{spectrometer}, \texttt{libras\_move}, \texttt{arrhythmia}, \texttt{oil},
+\texttt{abalone\_19}), which have too few positives once split.}) plus a de-duplicated pull
+from OpenML \citep{vanschoren2014openml} (fraud, credit
 default, software-defect, churn, bankruptcy, medical screening, satellite/pulsar anomalies),
 positive rates from $\approx\!20\%$ down to $0.7\%$ --- plus 3 synthetic datasets. Large sets
 are subsampled to $30$k rows.
