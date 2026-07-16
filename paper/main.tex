@@ -165,11 +165,15 @@ the cost of the slower learners), using scikit-learn \citep{pedregosa2011scikit}
 objective (log-loss for boosting and logistic regression, Gini impurity for random forests);
 precision@$k$ is never a training target, only an evaluation/selection metric.
 
-\textbf{Budget sweep.} Throughout, $n_{\text{pos}}$ denotes the number of positives in the
-\emph{evaluation cohort} being ranked (the test split), \emph{not} the whole dataset --- in
-the fraud analogy, the test split is the monthly batch of installations, $n_{\text{pos}}$ is
-the frauds present in that batch, and $K$ is how many of them you can inspect. We set $K$ to
-hit target ratios $n_{\text{pos}}/K \in \{0.25,0.5,1,2,4,8,16\}$: a value of $16$ means the
+\textbf{Budget sweep.} Precision@$k$ is computed on \emph{two} splits: on validation to
+\emph{select} a model, and on test to measure its \emph{true} quality. We define $n_{\text{pos}}$
+and $K$ on the \textbf{test split} --- the held-out cohort on which we score ground truth ---
+where $n_{\text{pos}}$ is the number of positives in that cohort (not the whole dataset) and $K$
+the budget; in the fraud analogy, test is the monthly batch of installations, $n_{\text{pos}}$
+the frauds it contains, and $K$ how many you inspect. On the validation split we apply the
+\emph{same operating point}: a budget $K_{\text{val}}$ scaled to the validation size so it covers
+the same top-fraction (so validation precision@$k$ estimates the same quantity). We set the test
+budget $K$ to hit target ratios $n_{\text{pos}}/K \in \{0.25,0.5,1,2,4,8,16\}$: a value of $16$ means the
 cohort contains $16\times$ more positives than the budget (a tiny budget --- the typical fraud
 regime), whereas $0.25$ means the budget is four times larger than \emph{all} the positives.
 This spans budgets far larger and far smaller than the positive pool. Note this ratio is
