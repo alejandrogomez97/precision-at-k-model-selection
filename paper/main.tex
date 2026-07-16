@@ -53,7 +53,10 @@ budget, legal quota). The natural success metric is
 \begin{equation}
 \text{precision@}k = \frac{\#\{\text{true positives among the top-}k\text{ scored items}\}}{k}.
 \end{equation}
-Such problems are ubiquitous (audits, marketing, triage, moderation, lead scoring).
+Such problems are ubiquitous (audits, marketing, triage, moderation, lead scoring), and they
+are almost always \emph{binary and highly imbalanced}: the positive class one is hunting for
+--- fraud, default, disease, a rare defect --- is a small minority, which is precisely why a
+capped budget bites and why we study binary imbalanced datasets throughout.
 
 When a single metric \emph{is} the objective, the instinctive move is to optimise for it
 directly, wherever the pipeline lets you: first as the \emph{training loss}, so the model is
