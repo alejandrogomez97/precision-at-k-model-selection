@@ -55,14 +55,21 @@ budget, legal quota). The natural success metric is
 \end{equation}
 Such problems are ubiquitous (audits, marketing, triage, moderation, lead scoring).
 
-As \emph{background}, we first recall the well-known reason precision@$k$ cannot be a
-\emph{training} loss for gradient-based learners --- it is piecewise-constant with a zero
-gradient --- and make it concrete with a worked gradient-boosting step (Section~\ref{sec:loss}).
-This is not a contribution; it is the setup. The interesting question is \emph{model selection},
-where precision@$k$ \emph{is} admissible (we only need to compute it, not differentiate it).
-Here the natural instinct is compelling: since we want the model with the highest
-\emph{test} precision@$k$, we should keep the model with the highest \emph{validation}
-precision@$k$. Our contributions are about whether that instinct holds.
+When a single metric \emph{is} the objective, the instinctive move is to optimise for it
+directly, wherever the pipeline lets you: first as the \emph{training loss}, so the model is
+fit to maximise precision@$k$; and, if that is not possible, at least as the metric that
+\emph{chooses} the model --- for early stopping and for picking among candidate
+configurations. Both moves seem obviously right if precision@$k$ is what you are graded on.
+This paper follows both.
+
+The first is a dead end, for a reason we recall only as \emph{background}: precision@$k$ is
+piecewise-constant with a zero gradient, so it cannot be a training loss for gradient-based
+learners (Section~\ref{sec:loss}). That is well known and not our contribution. The interesting
+move is the second --- \emph{model selection} --- where precision@$k$ \emph{is} admissible
+(we only need to compute it, not differentiate it), and where the instinct is especially
+compelling: since we want the model with the highest \emph{test} precision@$k$, surely we
+should keep the model with the highest \emph{validation} precision@$k$. Our contributions are
+about whether that instinct holds.
 
 \textbf{(1)} Empirically, across 93 imbalanced datasets and three model families (gradient
 boosting, random forests, logistic regression), it does not: selecting by \emph{average
