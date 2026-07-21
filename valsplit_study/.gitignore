@@ -1,0 +1,14 @@
+# artefactos de ejecución y temporales (no van al repo)
+logs/
+catboost_info/
+__pycache__/
+*.pyc
+results/_isoE1_old_*/
+*.done
+
+
+results/
+
+# HTML construidos (base64 embebido, regenerables con medium_html.py / build_article_html*.py)
+*.html
+!valsplit_study/_article_css.html
