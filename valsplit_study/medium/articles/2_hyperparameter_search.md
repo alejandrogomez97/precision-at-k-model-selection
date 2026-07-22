@@ -14,8 +14,11 @@ The shared rig, briefly:
 - **89 imbalanced binary datasets**, metric **Average Precision** (PR-AUC).
 - **A fixed, shared test set** touched once. Base learner: **LightGBM** with early stopping;
   per-fold preprocessing, no leakage.
-- Search runs inside the **E1 framework** (dev → train/val; trees fixed by CV on train;
-  candidates scored on val), on 8 representative datasets at 30% and 100% of dev, 2 seeds.
+- Search runs in the **E2 framework** — the one Part 1 endorsed: cross-validation over the
+  whole development pool, and each configuration is ranked by its **out-of-fold (OOF) AP**
+  (no separate validation set; the OOF picks both the number of trees and the winning config).
+  The winner is refit on all of dev and judged on test. On 8 representative datasets at 30%
+  and 100% of dev, 2 seeds.
 - **The rule that governs this article: judge at *equal compute*, not equal config count** —
   because, as we'll see, "same number of configs" is emphatically *not* "same time."
 - **Every p-value is a paired t-test on the same splits.** In plain terms: I compare two
@@ -53,43 +56,41 @@ saves time by killing bad configs early on a cheap "fidelity" (here, few boostin
 - **GP Bayesian** — Bayesian optimization with a Gaussian-Process surrogate, the method the
   tree-boosting literature often reports as the strongest full-budget searcher.
 
-## Finding 1 — on accuracy, nobody pulls away from the grid
+## Finding 1 — the grid isn't just competitive; it's the best
 
-At an equal number of configurations, all **seven** methods land within ~0.005 AP of each
-other, and **none beats the grid significantly**: random +0.0025 (p = 0.40), TPE +0.0030
-(p = 0.32), CMA-ES +0.0036 (p = 0.21), GP +0.0045 (p = 0.30), BOHB +0.0038 (p = 0.37),
-Hyperband +0.0015 (p = 0.58). GP nudges out the highest absolute AP (0.703 vs the grid's
-0.698), but even that is a rounding error, not significance — every gap has p > 0.2.
-
-And **more budget barely helps**: going from 20 to 160 configurations moves AP by about
-+0.006 at most.
+At an equal number of configurations, the humble grid posts the **highest AP of all seven
+methods (0.707)** — and *nobody beats it*. More striking, two of the "smarter" methods are
+**significantly worse**: plain random search −0.0104 (p = 0.02) and GP-Bayesian −0.0080
+(p = 0.04); TPE trails too (−0.0048, p = 0.07). CMA-ES, Hyperband and BOHB essentially tie
+the grid (−0.003 to −0.002, not significant). So the verdict is sharper than "fancy search
+doesn't help": on a sensible small LightGBM grid, blind or Bayesian search can actively
+*cost* you accuracy. And **more budget barely helps** — 20→160 configs moves AP by a few
+thousandths at most.
 
 *[TABLE 1 — table2_hpo.png]*
 
 ## Finding 2 — "same number of configs" is not "same compute"
 
-If accuracy doesn't separate them, *time* does — and this is the methodological punchline.
-The grid fixes a low `learning_rate`, so every model grows many boosting rounds before early
-stopping. The smart samplers drift toward higher learning rates that converge in fewer trees,
-so they're cheaper per config. The standout among the full-budget methods is **GP: the same
-160 configs, but ~2.5× faster than the grid (225s vs 565s)**, because it homes in on
-efficient regions. Random search, sampling blindly, is the *slowest* of all (681s) — the
-worst of both worlds: no better on AP, most expensive to run.
+Time doesn't rescue the search methods either. On the same 160 configs, the full-budget
+methods land in a modest band (TPE 182s, GP 196s, grid 199s, CMA-ES 218s), with **random
+search the slowest (260s)** — fitting, since it's also the worst on AP: the true worst of
+both worlds. The grid fixes a low `learning_rate` (many boosting rounds), while the learning
+samplers drift toward faster-converging configs — but the spread is small, and none of it
+buys better AP.
 
-## Finding 3 — where fancy search finally earns its keep: multi-fidelity
+## Finding 3 — the multi-fidelity "speedup" is a mirage under honest CV
 
-Here's the real time story. Hyperband and BOHB don't run every config to completion — they
-train each on just a few trees first and **kill the losers early**, letting only the
-promising ones grow. On the *exact same 160 configurations*, the payoff is dramatic:
+This is the twist, and it ties the whole series together. Hyperband and BOHB are supposed to
+be the *time* win: train each config on a few trees, **kill the losers early**, only grow the
+survivors. And in an **E1 setup** — a single held-out validation set — they are: pruning on
+that one `val` signal is cheap, and you'd clock them at an order of magnitude faster.
 
-> **Hyperband and BOHB reach the same AP as everyone else in ~15× less wall-clock** —
-> 38s and 37s, versus the grid's 565s.
-
-Look at the time panel (log scale): the two multi-fidelity methods sit an order of magnitude
-below the rest. And it's not a quality trade-off — BOHB even matches the full-budget methods'
-AP (0.702), because its Bayesian sampling spends the time it saves on *better* configs rather
-than just more of them. This is the one place fancier search clearly wins: **not more
-accuracy — the same accuracy, far cheaper.**
+But Part 1 concluded you should select by **cross-validation (OOF), not a separate val** — so
+that's what we do here. And under honest CV, the cheap trick disappears: to prune on the
+out-of-fold signal you have to train *all K folds*, so Hyperband and BOHB end up
+**2–2.5× *slower* than the grid** (368s and 475s vs 199s) — for no gain in AP. The famous
+multi-fidelity speedup was an artifact of the very habit the series argues against; hold
+yourself to consistent CV selection and it evaporates.
 
 *[FIGURE 1 — fig_hpo.png]*
 
@@ -97,18 +98,18 @@ accuracy — the same accuracy, far cheaper.**
 
 ## The moral
 
-**For a small, sensible LightGBM grid, no search method buys you more accuracy.** Bayesian,
-evolutionary and multi-fidelity all tie the grid on AP (*every gap p > 0.2*), and more budget
-barely moves the needle. What genuinely differs is **time** — and there the verdict is clear:
+**Under honest cross-validated selection, a small sensible LightGBM grid is the best deal on
+both axes at once** — the highest AP *and* among the fastest to run. Bayesian, evolutionary
+and multi-fidelity search don't beat it on accuracy (and random and GP are *significantly
+worse*), while multi-fidelity's celebrated time savings vanish the moment you select by CV
+instead of a held-out set.
 
-- **Multi-fidelity (Hyperband, BOHB) gets the same AP in ~15× less time** by pruning bad
-  configs after a few trees. If search time hurts, this is the win.
-- **GP** is a solid ~2.5× faster than the grid at full budget.
-- **Random search is the worst of both worlds** — no better on AP, and the slowest to run.
+- **Grid: best AP, cheap.** Hard to beat, easy to run.
+- **Random / GP: significantly worse AP.** Blind or Bayesian, they lose here.
+- **Hyperband / BOHB: no AP gain and 2–2.5× slower** once pruning has to run on OOF.
 
-So don't expect fancy search to raise your score over a well-chosen grid — it won't. But if
-you care about the clock, skip random and reach for a multi-fidelity method: same score, a
-fraction of the compute.
+So don't reach for fancy hyperparameter search to squeeze more out of a well-chosen grid — on
+this problem it doesn't help and can hurt. Save it for spaces a grid genuinely can't cover.
 
 *Next in the series: the ensemble myth — is "a thousand LightGBM configs" really faster than
 building an ensemble? Code and all the numbers are in the study repo; every p-value is a

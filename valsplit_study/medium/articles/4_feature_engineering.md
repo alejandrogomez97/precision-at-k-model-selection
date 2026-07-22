@@ -32,8 +32,12 @@ suffer from noise — they'd confound the answer.
 ## The experiment: feed it growing amounts of nonsense
 
 At 100% of each dataset's development pool, I add **random, meaningless features** and watch
-the AP. The invented features are arithmetic mashups of random feature pairs —
-`v_i/v_j`, `v_i·v_j`, `v_i−v_j`, `|v_i−v_j|`, `v_i+v_j` — plus pure noise, added in growing
+the AP. Each invented feature is one of six kinds, picked uniformly at random: five are
+arithmetic mashups of a random pair of real features — `v_i/v_j`, `v_i·v_j`, `v_i−v_j`,
+`|v_i−v_j|`, `v_i+v_j` — and the sixth is pure Gaussian noise. So **≈5/6 of the invented
+columns are random combinations of real features and ≈1/6 is pure noise** — mimicking how
+people actually do "feature engineering on a hunch" (mostly ratios/products/differences,
+with the occasional meaningless column thrown in). I add them in growing
 amounts: **10%, 20%, … up to 100%** of the original feature count (at 100%, half the columns
 are invented garbage).
 
@@ -71,8 +75,10 @@ features that actually mean something.
 
 **How it was done.** Model: E2 with LightGBM (ens-E2 avoided — its non-tree members suffer
 from noise and would confound the answer). 8 datasets, 100% of dev (capped at 8,000 rows for
-cost), 2 seeds. The invented features are random meaningless combinations of feature pairs
-plus pure noise, added in growing amounts (10%…100% of the original feature count; at 100%
+cost), 2 seeds. Each invented feature is one of six kinds chosen uniformly at random — five
+arithmetic combinations of a random feature pair (`v_i/v_j`, `v_i·v_j`, `v_i−v_j`,
+`|v_i−v_j|`, `v_i+v_j`) and one pure-Gaussian-noise column — so ≈5/6 are random combos and
+≈1/6 is pure noise. Added in growing amounts (10%…100% of the original feature count; at 100%
 half the columns are invented). We report the paired ΔAP vs 0% noise.
 
 ---

@@ -1,61 +1,61 @@
 {
  "grid": {
-  "ap_min_budget": 0.6976,
-  "ap_max_budget": 0.698,
-  "gain_budget": 0.0004
+  "ap_min_budget": 0.7007,
+  "ap_max_budget": 0.7073,
+  "gain_budget": 0.0065
  },
  "random": {
-  "ap_min_budget": 0.6981,
-  "ap_max_budget": 0.7005,
-  "gain_budget": 0.0024,
-  "vs_grid_mean": 0.0025,
-  "vs_grid_p": 0.40354658087897255,
-  "vs_grid_winrate": 0.688,
+  "ap_min_budget": 0.6984,
+  "ap_max_budget": 0.6968,
+  "gain_budget": -0.0016,
+  "vs_grid_mean": -0.0104,
+  "vs_grid_p": 0.01912764201595017,
+  "vs_grid_winrate": 0.25,
   "vs_grid_n": 32
  },
  "tpe": {
-  "ap_min_budget": 0.6952,
-  "ap_max_budget": 0.701,
-  "gain_budget": 0.0058,
-  "vs_grid_mean": 0.003,
-  "vs_grid_p": 0.32382516404267647,
-  "vs_grid_winrate": 0.594,
+  "ap_min_budget": 0.7009,
+  "ap_max_budget": 0.7024,
+  "gain_budget": 0.0015,
+  "vs_grid_mean": -0.0048,
+  "vs_grid_p": 0.07199317753233767,
+  "vs_grid_winrate": 0.312,
   "vs_grid_n": 32
  },
  "cmaes": {
-  "ap_min_budget": 0.6997,
-  "ap_max_budget": 0.7016,
-  "gain_budget": 0.0019,
-  "vs_grid_mean": 0.0036,
-  "vs_grid_p": 0.2115396193808593,
-  "vs_grid_winrate": 0.531,
-  "vs_grid_n": 32
- },
- "hyperband": {
-  "ap_min_budget": 0.6956,
-  "ap_max_budget": 0.6994,
-  "gain_budget": 0.0039,
-  "vs_grid_mean": 0.0015,
-  "vs_grid_p": 0.584392142381259,
-  "vs_grid_winrate": 0.594,
-  "vs_grid_n": 32
- },
- "bohb": {
-  "ap_min_budget": 0.7003,
-  "ap_max_budget": 0.7018,
-  "gain_budget": 0.0015,
-  "vs_grid_mean": 0.0038,
-  "vs_grid_p": 0.365813103441023,
-  "vs_grid_winrate": 0.562,
+  "ap_min_budget": 0.6992,
+  "ap_max_budget": 0.7045,
+  "gain_budget": 0.0053,
+  "vs_grid_mean": -0.0028,
+  "vs_grid_p": 0.2426946964704348,
+  "vs_grid_winrate": 0.406,
   "vs_grid_n": 32
  },
  "gp": {
-  "ap_min_budget": 0.6937,
-  "ap_max_budget": 0.7025,
-  "gain_budget": 0.0088,
-  "vs_grid_mean": 0.0045,
-  "vs_grid_p": 0.2976757671154884,
-  "vs_grid_winrate": 0.625,
+  "ap_min_budget": 0.6944,
+  "ap_max_budget": 0.6992,
+  "gain_budget": 0.0049,
+  "vs_grid_mean": -0.008,
+  "vs_grid_p": 0.03508018943197065,
+  "vs_grid_winrate": 0.281,
+  "vs_grid_n": 32
+ },
+ "hyperband": {
+  "ap_min_budget": 0.7012,
+  "ap_max_budget": 0.7042,
+  "gain_budget": 0.003,
+  "vs_grid_mean": -0.0031,
+  "vs_grid_p": 0.3814804376450197,
+  "vs_grid_winrate": 0.531,
+  "vs_grid_n": 32
+ },
+ "bohb": {
+  "ap_min_budget": 0.7021,
+  "ap_max_budget": 0.7055,
+  "gain_budget": 0.0034,
+  "vs_grid_mean": -0.0018,
+  "vs_grid_p": 0.5407801422250478,
+  "vs_grid_winrate": 0.562,
   "vs_grid_n": 32
  }
 }

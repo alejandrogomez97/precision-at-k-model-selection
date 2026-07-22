@@ -1,4 +1,4 @@
-# "LightGBM is faster than an ensemble." True — and exactly why the ensemble wins
+# We use LightGBM because it's fast. So why do we train thousands of them?
 
 *Part three of a series putting common ML habits to the test on 89 imbalanced datasets.
 This is the habit I hear most, and it's the most seductive because its premise is actually
@@ -32,10 +32,18 @@ The shared rig, briefly:
 one LightGBM trains far faster than a blend of ten models. So people skip ensembles on
 principle.
 
-But here's the catch: **nobody trains just one LightGBM.** They try dozens, hundreds, a
-thousand configs, sweeping hyperparameters — and *that* is where the time goes. Once you add
-up all those configs, you've spent as much compute as an ensemble would have cost… you just
-have nothing better than a single tuned LightGBM to show for it.
+And it's worth remembering *why* LightGBM is fast in the first place. That was its entire
+reason for existing: the original paper (Ke et al., NeurIPS 2017) set out to match the
+accuracy of XGBoost-style gradient boosting **but train far faster and lighter** — reporting
+up to ~20× speedups — via two tricks, **GOSS** (subsample the low-gradient examples) and
+**EFB** (bundle sparse, mutually-exclusive features so there's less to scan). LightGBM is,
+by design, the *save-time* tool.
+
+Which makes the habit doubly ironic: **nobody trains just one LightGBM.** They try dozens,
+hundreds, a thousand configs, sweeping hyperparameters — and *that* is where the time goes.
+We reach for the model built to save time, and then spend it all anyway. Once you add up all
+those configs, you've spent as much compute as an ensemble would have cost… you just have
+nothing better than a single tuned LightGBM to show for it.
 
 So the honest question isn't "single model vs ensemble". It's: **given the time you were
 going to burn on all those configs anyway, what gives the best AP?**

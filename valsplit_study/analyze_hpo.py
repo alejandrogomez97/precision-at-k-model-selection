@@ -20,7 +20,8 @@ SUF = "_en" if EN else ""
 
 
 def main():
-    rows = [r for f in glob.glob(f"{STUDY}/results/hpo__*.json") for r in json.load(open(f))]
+    tag = os.environ.get("HPO_TAG", "hpo")
+    rows = [r for f in glob.glob(f"{STUDY}/results/{tag}__*.json") for r in json.load(open(f))]
     if not rows:
         print("hpo sin datos"); return
     d = pd.DataFrame(rows)
