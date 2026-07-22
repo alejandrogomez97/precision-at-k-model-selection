@@ -56,16 +56,21 @@ saves time by killing bad configs early on a cheap "fidelity" (here, few boostin
 - **GP Bayesian** — Bayesian optimization with a Gaussian-Process surrogate, the method the
   tree-boosting literature often reports as the strongest full-budget searcher.
 
-## Finding 1 — the grid isn't just competitive; it's the best
+## Finding 1 — nobody reliably beats the grid (and the blind ones lose)
 
-At an equal number of configurations, the humble grid posts the **highest AP of all seven
-methods (0.707)** — and *nobody beats it*. More striking, two of the "smarter" methods are
-**significantly worse**: plain random search −0.0104 (p = 0.02) and GP-Bayesian −0.0080
-(p = 0.04); TPE trails too (−0.0048, p = 0.07). CMA-ES, Hyperband and BOHB essentially tie
-the grid (−0.003 to −0.002, not significant). So the verdict is sharper than "fancy search
-doesn't help": on a sensible small LightGBM grid, blind or Bayesian search can actively
-*cost* you accuracy. And **more budget barely helps** — 20→160 configs moves AP by a few
-thousandths at most.
+Across budgets the seven methods sit within ~0.01 AP of each other, but there's a subtle
+pattern worth seeing. At the **smaller budgets (20–80 configs) BOHB posts the best AP** —
+smart sampling plus early pruning finds good configs with fewer tries, so it shines when you
+can only afford a handful. But its edge is tiny (≤0.006) and never significant. Give everyone
+the **full budget (160 configs)** and the plain grid pulls level and nudges ahead (0.707, the
+top score) — the fancy searchers have just caught up to where the grid already was.
+
+And at that full budget the only *significant* gaps are the methods that **trail** the grid:
+plain random search −0.0104 (p = 0.02) and GP-Bayesian −0.0080 (p = 0.04); TPE is borderline
+(−0.0048, p = 0.07); CMA-ES, Hyperband and BOHB tie it. So the honest verdict: **no search
+method reliably beats a sensible grid on accuracy** — the clever ones merely reach the same
+place, and the blind ones fall behind. And **more budget barely helps** — 20→160 configs
+moves AP by a few thousandths at most.
 
 *[TABLE 1 — table2_hpo.png]*
 
