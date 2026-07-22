@@ -83,13 +83,53 @@ half the columns are invented). We report the paired ΔAP vs 0% noise.
 
 ---
 
+## What about *removing* features?
+
+If *adding* variables doesn't help, maybe the opposite does: **removing redundant ones**.
+Datasets often carry features that are near-copies of each other, and the folklore says
+pruning them cleans up the model. So I ran the mirror experiment. For each dataset I computed
+the **Spearman correlation between every pair of features** (on the development data only, in
+absolute value — a strong negative correlation is just as redundant as a positive one), and
+swept a threshold: at each level I dropped any feature that correlated **≥ threshold** with
+another one I'd already kept. Same E2 + LightGBM setup, judged on the same test set.
+
+The result is the mirror image of the "adding" story — **removing doesn't help either, and
+overdoing it hurts a lot:**
+
+- **Cutting near-duplicates is harmless (and a touch faster).** At `|ρ|≥0.99` and `|ρ|≥0.95`
+  you drop ~9–14% of the features and AP doesn't move (ΔAP +0.003 and +0.001, not
+  significant), while training shaves a few percent off the clock.
+- **Cutting anything more is actively destructive.** At `|ρ|≥0.85–0.75` you remove ~40% of
+  the columns and AP **collapses by −0.04 to −0.06** (p ≤ 0.04) — features that are "only"
+  0.75–0.85 correlated still carry complementary signal, and throwing them out is throwing
+  away accuracy.
+
+*[TABLE 2 — table6_featreduce.png]*
+
+One clarification, because it's easy to conflate: this is **not** what LightGBM's **EFB**
+(Exclusive Feature Bundling, from Part 3) does. EFB bundles **sparse, mutually-exclusive**
+features — ones that are almost never non-zero at the same time (think one-hot columns) — and
+it's essentially lossless, done purely for speed. Our pruning is the opposite kind of move:
+it deletes **densely correlated** features by hand, and it can — and does — throw away signal.
+LightGBM already copes with redundancy internally (a correlated copy just rarely gets chosen
+for a split); doing its job manually, on a hunch, mostly just risks hurting you.
+
+**Takeaway:** removing features is like adding them — it won't raise your AP. If you only cut
+*near-perfect* duplicates (`|ρ|≥0.95`) it's safe and trims a little time; anything more
+aggressive quietly deletes accuracy.
+
+---
+
 ## The moral
 
-**Trees are robust to junk, but robustness isn't the same as free.** Adding speculative
-features almost never helps, occasionally hurts a little, and always costs training time.
-The comforting belief ("it can't hurt, might help") is wrong on the economics even when it's
-roughly right on the accuracy. Real feature engineering — features grounded in the problem —
-is worth every second. Random ones are worth none.
+**Trees are robust to junk, but robustness isn't the same as free — and neither direction of
+mindless feature fiddling pays off.** *Adding* speculative features almost never helps,
+occasionally hurts a little, and always costs training time. *Removing* features by
+correlation doesn't help either: safe only if you cut near-perfect duplicates, and
+destructive (−0.04 to −0.06 AP) if you get greedy. Both point the same way: LightGBM already
+handles redundant and useless columns better than your reflexes do. Real feature engineering
+— features grounded in the problem — is worth every second. Inventing or pruning on a hunch
+is worth none.
 
 *This is the last of a four-part series. The earlier parts covered validation splits &
 retraining, hyperparameter search, and ensembles. Code and all the numbers are in the study

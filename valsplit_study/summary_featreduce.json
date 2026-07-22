@@ -1,0 +1,60 @@
+{
+ "by_thr": [
+  {
+   "thr": 0.75,
+   "n_removed": 10.6,
+   "pct_removed": 41.3,
+   "ap": 0.673,
+   "dAP": -0.0593,
+   "time": 16.0
+  },
+  {
+   "thr": 0.8,
+   "n_removed": 10.5,
+   "pct_removed": 41.0,
+   "ap": 0.6868,
+   "dAP": -0.0455,
+   "time": 16.1
+  },
+  {
+   "thr": 0.85,
+   "n_removed": 9.6,
+   "pct_removed": 37.5,
+   "ap": 0.6895,
+   "dAP": -0.0428,
+   "time": 16.8
+  },
+  {
+   "thr": 0.9,
+   "n_removed": 7.6,
+   "pct_removed": 24.4,
+   "ap": 0.7233,
+   "dAP": -0.009,
+   "time": 18.4
+  },
+  {
+   "thr": 0.95,
+   "n_removed": 4.6,
+   "pct_removed": 13.5,
+   "ap": 0.7331,
+   "dAP": 0.0008,
+   "time": 20.9
+  },
+  {
+   "thr": 0.99,
+   "n_removed": 3.5,
+   "pct_removed": 8.7,
+   "ap": 0.7348,
+   "dAP": 0.0026,
+   "time": 21.9
+  },
+  {
+   "thr": 1.01,
+   "n_removed": 0.0,
+   "pct_removed": 0.0,
+   "ap": 0.7323,
+   "dAP": 0.0,
+   "time": 22.5
+  }
+ ]
+}
