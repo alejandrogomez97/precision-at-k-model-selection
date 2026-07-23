@@ -113,6 +113,18 @@ rows = [[f"{r['level']*100:.0f}%", f"{r['ap']:.3f}", f"{r['dAP']:+.4f}", f"{r['t
 render("table4_feateng.png", "Speculative feature engineering: AP vs % random features",
        ["% invented", "AP", "ΔAP vs 0%", "time"], rows, [([1], True)],
        f"At 100% added features: ΔAP = {fe['dAP_100_mean']:+.4f}, p = {fe['dAP_100_p']:.2f}. AP barely moves.")
+# ---- Tabla 2c: HPO E1 vs E2 (AP y tiempo por método) ----
+ee = json.load(open(f"{STUDY}/summary_hpo_e1e2.json"))
+mm = ["grid", "random", "tpe", "cmaes", "gp", "hyperband", "bohb"]
+rows = [[m, f"{ee[m]['e1_ap']:.3f}", f"{ee[m]['e1_t']:.0f}s",
+         f"{ee[m]['e2_ap']:.3f}", f"{ee[m]['e2_t']:.0f}s"] for m in mm]
+render("table2c_e1_vs_e2.png", "HPO: E1 (held-out val) vs E2 (CV/OOF) — AP & search time @160 configs",
+       ["method", "AP (E1)", "time (E1)", "AP (E2)", "time (E2)"], rows,
+       [([1], True), ([2], False), ([3], True), ([4], False)],
+       "Green = best AP / fastest, per column. The time flips: under E1 the multi-fidelity methods "
+       "(hyperband, bohb) are ~15x FASTER than the grid; under honest CV selection (E2) they're ~2x "
+       "SLOWER — their speedup only exists when pruning rides a single held-out val set.")
+
 # ---- Tabla 6: reducción por correlación de Spearman ----
 fr = json.load(open(f"{STUDY}/summary_featreduce.json"))["by_thr"]
 base = [x for x in fr if x["thr"] > 1][0]

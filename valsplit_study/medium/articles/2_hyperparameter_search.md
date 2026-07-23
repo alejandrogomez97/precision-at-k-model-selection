@@ -87,15 +87,20 @@ buys better AP.
 
 This is the twist, and it ties the whole series together. Hyperband and BOHB are supposed to
 be the *time* win: train each config on a few trees, **kill the losers early**, only grow the
-survivors. And in an **E1 setup** — a single held-out validation set — they are: pruning on
-that one `val` signal is cheap, and you'd clock them at an order of magnitude faster.
+survivors. And in an **E1 setup** — a single held-out validation set — they absolutely are.
+I ran the exact same search that way too, and the numbers are dramatic: Hyperband and BOHB
+finish in **38s and 37s versus the grid's 565s — about 15× faster** — at the same AP. If the
+story stopped there, "reach for multi-fidelity" would be the obvious advice.
 
 But Part 1 concluded you should select by **cross-validation (OOF), not a separate val** — so
-that's what we do here. And under honest CV, the cheap trick disappears: to prune on the
-out-of-fold signal you have to train *all K folds*, so Hyperband and BOHB end up
-**2–2.5× *slower* than the grid** (368s and 475s vs 199s) — for no gain in AP. The famous
-multi-fidelity speedup was an artifact of the very habit the series argues against; hold
-yourself to consistent CV selection and it evaporates.
+that's what the E2 numbers above use. And under honest CV, the cheap trick **inverts**: to
+prune on the out-of-fold signal you have to train *all K folds*, so Hyperband and BOHB go from
+15× faster to **2–2.5× *slower* than the grid** (368s and 475s vs 199s) — for no gain in AP.
+The table below puts the two regimes side by side; the flip in the time columns is the whole
+point. The famous multi-fidelity speedup was an artifact of the very habit the series argues
+against — hold yourself to consistent CV selection and it evaporates.
+
+*[TABLE 3 — table2c_e1_vs_e2.png]*
 
 *[FIGURE 1 — fig_hpo.png]*
 
