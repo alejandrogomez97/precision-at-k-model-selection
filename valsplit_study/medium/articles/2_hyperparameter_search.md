@@ -87,20 +87,19 @@ buys better AP.
 
 This is the twist, and it ties the whole series together. Hyperband and BOHB are supposed to
 be the *time* win: train each config on a few trees, **kill the losers early**, only grow the
-survivors. And in an **E1 setup** — a single held-out validation set — they absolutely are.
-I ran the exact same search that way too, and the numbers are dramatic: Hyperband and BOHB
-finish in **38s and 37s versus the grid's 565s — about 15× faster** — at the same AP. If the
-story stopped there, "reach for multi-fidelity" would be the obvious advice.
+survivors. And with a **single held-out validation set (E1)** they absolutely are — I ran the
+same search that way too, and pruning on that one cheap signal makes them **about 20× faster
+than the grid** at the same AP. That's exactly why multi-fidelity is famous.
 
-But Part 1 concluded you should select by **cross-validation (OOF), not a separate val** — so
-that's what the E2 numbers above use. And under honest CV, the cheap trick **inverts**: to
-prune on the out-of-fold signal you have to train *all K folds*, so Hyperband and BOHB go from
-15× faster to **2–2.5× *slower* than the grid** (368s and 475s vs 199s) — for no gain in AP.
-The table below puts the two regimes side by side; the flip in the time columns is the whole
-point. The famous multi-fidelity speedup was an artifact of the very habit the series argues
-against — hold yourself to consistent CV selection and it evaporates.
-
-*[TABLE 3 — table2c_e1_vs_e2.png]*
+But Part 1 concluded you should select by **cross-validation (OOF), not a separate val** — and
+that's what we do here. Under honest CV the cheap trick **inverts**: to prune on the
+out-of-fold signal you have to train *all K folds* at each rung, so instead of ~20× faster,
+Hyperband and BOHB come out **~1.5× *slower* than the grid** — for no gain in AP. (A note on
+reading times: I don't compare E1 seconds against E2 seconds — those runs happened at
+different times under different machine load — but *within* each framework, where the grid and
+the multi-fidelity methods run back-to-back on the same cell, so each method's speed is
+measured against its own framework's grid.) The famous speedup was an artifact of the very
+habit the series argues against; hold yourself to consistent CV selection and it evaporates.
 
 *[FIGURE 1 — fig_hpo.png]*
 
@@ -116,7 +115,8 @@ instead of a held-out set.
 
 - **Grid: best AP, cheap.** Hard to beat, easy to run.
 - **Random / GP: significantly worse AP.** Blind or Bayesian, they lose here.
-- **Hyperband / BOHB: no AP gain and 2–2.5× slower** once pruning has to run on OOF.
+- **Hyperband / BOHB: no AP gain and ~1.5× slower than the grid** under CV — the famous ~20×
+  speedup only exists with a held-out val, not with honest out-of-fold pruning.
 
 So don't reach for fancy hyperparameter search to squeeze more out of a well-chosen grid — on
 this problem it doesn't help and can hurt. Save it for spaces a grid genuinely can't cover.

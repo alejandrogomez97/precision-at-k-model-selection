@@ -41,21 +41,21 @@
   "vs_grid_n": 32
  },
  "hyperband": {
-  "ap_min_budget": 0.7012,
-  "ap_max_budget": 0.7042,
-  "gain_budget": 0.003,
-  "vs_grid_mean": -0.0031,
-  "vs_grid_p": 0.3814804376450197,
+  "ap_min_budget": 0.7018,
+  "ap_max_budget": 0.7046,
+  "gain_budget": 0.0028,
+  "vs_grid_mean": -0.0026,
+  "vs_grid_p": 0.4854226458065213,
   "vs_grid_winrate": 0.531,
   "vs_grid_n": 32
  },
  "bohb": {
-  "ap_min_budget": 0.7021,
-  "ap_max_budget": 0.7055,
-  "gain_budget": 0.0034,
-  "vs_grid_mean": -0.0018,
-  "vs_grid_p": 0.5407801422250478,
-  "vs_grid_winrate": 0.562,
+  "ap_min_budget": 0.7036,
+  "ap_max_budget": 0.7066,
+  "gain_budget": 0.003,
+  "vs_grid_mean": -0.0007,
+  "vs_grid_p": 0.8335167778552961,
+  "vs_grid_winrate": 0.5,
   "vs_grid_n": 32
  }
 }

@@ -25,7 +25,8 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 METHODS_FULL = ["grid", "random", "tpe", "cmaes", "gp"]
 METHODS_MF = ["hyperband", "bohb"]
-MIN_RES, MAX_RES, RF = 50, 2000, 3
+MIN_RES, MAX_RES, RF = 50, 1600, 2   # rungs finos (50,100,200,400,800,1600)
+ES_RUNGS, ES_TOL = 1, 1e-3           # early stopping OOF: para de escalar en cuanto un rung gana <0.001
 
 
 # ---------- full-budget: selección por AP OOF ----------
@@ -73,7 +74,7 @@ def eval_config_mf_e2(trial, cand, Xdev, ydev, meta, seed):
         folds.append({"dtr": lgb.Dataset(Xtr2, label=ytr2, free_raw_data=False), "Xev": Xev, "ev": ev,
                       "params": params, "booster": None})
     oof = np.full(len(yd), np.nan)
-    best_ap, best_b, prev = -1.0, MIN_RES, 0
+    best_ap, best_b, prev, stall = -1.0, MIN_RES, 0, 0
     try:
         for b in _rungs():
             for f in folds:
@@ -81,12 +82,16 @@ def eval_config_mf_e2(trial, cand, Xdev, ydev, meta, seed):
                                          init_model=f["booster"], keep_training_booster=True)
                 oof[f["ev"]] = f["booster"].predict(f["Xev"])
             ap, _ = K._score(yd, oof)
-            if ap == ap and ap > best_ap:
-                best_ap, best_b = ap, b
+            if ap == ap and ap > best_ap + ES_TOL:
+                best_ap, best_b, stall = ap, b, 0
+            else:
+                stall += 1
             trial.report(ap if ap == ap else -1.0, b)
             prev = b
             if trial.should_prune():
                 raise optuna.TrialPruned()
+            if stall >= ES_RUNGS:      # early stopping: el OOF se estancó -> no seguir escalando árboles
+                break
         return best_ap, int(best_b)
     finally:
         # liberar Datasets/boosters de LightGBM (free_raw_data=False acumula en C++)
