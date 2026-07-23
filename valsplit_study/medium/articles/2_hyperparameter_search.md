@@ -16,11 +16,8 @@ The shared rig, briefly:
   per-fold preprocessing, no leakage.
 - Search runs in the **E2 framework** — the one Part 1 endorsed: cross-validation over the
   whole development pool, and each configuration is ranked by its **out-of-fold (OOF) AP**
-  (no separate validation set; the OOF picks both the number of trees and the winning config).
-  The winning config is then refit on all of dev for its final test score. (Part 1 showed you
-  can skip that refit under CV and simply *bag* the fold models for a hair more AP; but since
-  every method here gets the identical final step, that choice shifts them all equally and
-  leaves the ranking untouched — so we hold it fixed.) On 8 representative datasets at 30% and
+  (no separate validation set; the OOF picks both the number of trees and the winning config),
+  and the winner is scored on the held-out test set. On 8 representative datasets at 30% and
   100% of dev, 2 seeds.
 - **The rule that governs this article: judge at *equal compute*, not equal config count** —
   because, as we'll see, "same number of configs" is emphatically *not* "same time."
