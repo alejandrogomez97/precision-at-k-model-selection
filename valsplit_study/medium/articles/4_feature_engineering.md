@@ -110,11 +110,11 @@ To pin down exactly *where* removal stops being safe, I zoomed in with a fine sw
 `|ρ|≥0.90` to `1.00` in steps of 0.005 (correlations in absolute value, so a −0.92 counts the
 same as +0.92). The picture is flat: **across the entire 0.90–1.00 range, no threshold moves
 AP significantly** (every paired *p* > 0.12). You can drop anywhere from ~9% (at 0.99) to
-~24% (at 0.90) of the features and the curve just hugs the baseline. You might notice a small
-uptick from `|ρ|≥0.97` onwards — a nominal +0.002 to +0.0026 AP where only near-perfect
-duplicates get cut — but **it is not statistically significant** (paired *p* ≈ 0.34–0.45; the
-±1 SE band in the figure straddles zero the whole way). So no, removing near-duplicates does
-not reliably improve AP; that bump is noise. The damage from the coarse sweep only kicks in
+~24% (at 0.90) of the features and the curve just hugs the baseline. You might notice the
+ΔAP turn slightly positive from `|ρ|≥0.95` onwards — a nominal +0.0008 rising to +0.0026 by
+0.99, where only near-perfect duplicates get cut — but **it is not statistically significant**
+(paired *p* ≈ 0.34–0.69; the ±1 SE band in the figure straddles zero the whole way). So no,
+removing near-duplicates does not reliably improve AP; that bump is noise. The damage from the coarse sweep only kicks in
 *below* 0.90 (by 0.85 it's a significant −0.043). In other words: **≈0.90 is the floor of the
 safe zone**, and even inside it there's no real prize — removal is, at best, harmless.
 
