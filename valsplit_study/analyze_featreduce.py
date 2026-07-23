@@ -27,7 +27,8 @@ for thr in thrs:
     p = float(stats.ttest_1samp(dl, 0).pvalue) if len(dl) >= 3 and np.std(dl) > 0 else np.nan
     rec.append({"thr": thr, "n_removed": s.n_removed.mean(), "pct": s.pct_removed.mean(),
                 "ap": s.ap.mean(), "ap_se": s.ap.std() / np.sqrt(len(s)),
-                "dAP": s.dAP.mean(), "p": p, "n": len(s)})
+                "dAP": s.dAP.mean(), "dAP_se": (dl.std(ddof=1) / np.sqrt(len(dl))) if len(dl) > 1 else np.nan,
+                "p": p, "n": len(s)})
 A = pd.DataFrame(rec)
 
 print(f"baseline (keep all): AP={ap0:.4f}  (n_datasets×seeds por umbral = {A.n.iloc[0]})")
@@ -49,16 +50,18 @@ a0.set_xlabel("|Spearman| threshold (remove pairs with |ρ| ≥ threshold)")
 a0.set_ylabel("% features removed", color="#1f77b4"); a0b.set_ylabel("# features removed (mean)", color="#7f7f7f")
 a0.set_title("How many features get removed"); a0.grid(alpha=.3)
 a0.legend(handles=[l1, l2], fontsize=8, loc="upper right")
-# panel 2: AP vs umbral con SE, baseline y significancia
+# panel 2: ΔAP PAREADO vs umbral (la cantidad que importa) con banda ±SE y línea de 0
 a1 = ax[1]
-a1.axhline(ap0, color="k", ls="--", lw=.9, label=f"baseline (keep all) = {ap0:.3f}")
-a1.errorbar(A.thr, A.ap, yerr=A.ap_se, fmt="o-", color="#c0392b", capsize=3, label="AP (mean ± SE)")
+a1.axhline(0, color="k", ls="--", lw=.9, label="no change vs baseline (keep all)")
+a1.plot(A.thr, A.dAP, "o-", color="#c0392b", label="paired ΔAP (mean)")
+a1.fill_between(A.thr, A.dAP - A.dAP_se, A.dAP + A.dAP_se, color="#c0392b", alpha=.18, label="±1 SE (paired)")
 sig = A[A.p < 0.05]
 if len(sig):
-    a1.scatter(sig.thr, sig.ap, s=140, facecolors="none", edgecolors="red", linewidths=2,
+    a1.scatter(sig.thr, sig.dAP, s=140, facecolors="none", edgecolors="red", linewidths=2,
                label="p < 0.05 vs baseline", zorder=5)
-a1.set_xlabel("|Spearman| threshold"); a1.set_ylabel("AP (test)")
-a1.set_title("Does removing correlated features help AP?"); a1.legend(fontsize=8); a1.grid(alpha=.3)
+a1.set_xlabel("|Spearman| threshold"); a1.set_ylabel("ΔAP vs baseline (paired)")
+a1.set_title("Does removing correlated features help? (paired ΔAP)")
+a1.legend(fontsize=8); a1.grid(alpha=.3)
 plt.suptitle("Feature removal by Spearman correlation — fine sweep 0.90–1.00 (E2 + LightGBM, "
              f"{int(A.n.iloc[0]/2)} datasets × 2 seeds)", fontweight="bold")
 plt.tight_layout(); plt.savefig(f"{STUDY}/fig_featreduce_fine.png", dpi=140); plt.close()
