@@ -58,8 +58,8 @@ def eval_reduced(Xdev, ydev, Xte, yte, meta, drop_cols, seed):
     return float(r["test_ap_by_ap"]), time.perf_counter() - t0
 
 
-def run_dataset(name, seeds=None, tag="featreduce"):
-    seeds = seeds or SEEDS
+def run_dataset(name, seeds=None, tag="featreduce", thrs=None):
+    seeds = seeds or SEEDS; thrs = thrs or THRS
     safe = "".join(c if c.isalnum() or c in "-_." else "_" for c in name)
     outp = f"{K.RES}/{tag}__{safe}.json"
     done = {(r["seed"], r["thr"]) for r in json.load(open(outp))} if os.path.exists(outp) else set()
@@ -75,7 +75,7 @@ def run_dataset(name, seeds=None, tag="featreduce"):
         if ydev.sum() < K.CV_K:
             continue
         # thr=1.01 = baseline sin eliminar nada (mismo montaje, para comparar limpio)
-        for thr in [1.01] + THRS:
+        for thr in [1.01] + list(thrs):
             if (seed, thr) in done:
                 continue
             drop = corr_drop(Xdev, num_cols, thr)
@@ -100,13 +100,16 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("datasets", nargs="*")
     ap.add_argument("--seeds", type=str, default="0,1")
+    ap.add_argument("--thrs", type=str, default="")
+    ap.add_argument("--tag", type=str, default="featreduce")
     a = ap.parse_args()
     seeds = [int(s) for s in a.seeds.split(",") if s]
+    thrs = [round(float(x), 4) for x in a.thrs.split(",") if x] or THRS
     names = a.datasets or DATASETS
-    print(f"[featreduce] {len(names)} datasets, thrs={THRS}", flush=True)
+    print(f"[featreduce] {len(names)} datasets, tag={a.tag}, thrs={thrs}", flush=True)
     for i, nm in enumerate(names):
         print(f"[{i+1}/{len(names)}] {nm}", flush=True)
         try:
-            run_dataset(nm, seeds=seeds)
+            run_dataset(nm, seeds=seeds, tag=a.tag, thrs=thrs)
         except Exception as e:
             print(f"  !! {nm}: {type(e).__name__}: {e}", flush=True)

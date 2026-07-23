@@ -106,6 +106,17 @@ overdoing it hurts a lot:**
 
 *[TABLE 2 — table6_featreduce.png]*
 
+To pin down exactly *where* removal stops being safe, I zoomed in with a fine sweep from
+`|ρ|≥0.90` to `1.00` in steps of 0.005 (correlations in absolute value, so a −0.92 counts the
+same as +0.92). The picture is flat: **across the entire 0.90–1.00 range, no threshold moves
+AP significantly** (every paired *p* > 0.12). You can drop anywhere from ~9% (at 0.99) to
+~24% (at 0.90) of the features and the curve just hugs the baseline — the nominal best,
+`|ρ|≥0.99` (+0.0026), is well within the noise. The damage from the coarse sweep only kicks
+in *below* 0.90 (by 0.85 it's a significant −0.043). In other words: **≈0.90 is the floor of
+the safe zone**, and even inside it there's no real prize — removal is, at best, harmless.
+
+*[FIGURE 2 — fig_featreduce_fine.png]*
+
 One clarification, because it's easy to conflate: this is **not** what LightGBM's **EFB**
 (Exclusive Feature Bundling, from Part 3) does. EFB bundles **sparse, mutually-exclusive**
 features — ones that are almost never non-zero at the same time (think one-hot columns) — and
