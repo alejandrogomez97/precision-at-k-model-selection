@@ -121,6 +121,21 @@ instead of a held-out set.
 So don't reach for fancy hyperparameter search to squeeze more out of a well-chosen grid — on
 this problem it doesn't help and can hurt. Save it for spaces a grid genuinely can't cover.
 
+## Does this contradict the textbooks?
+
+Not really — and it's worth being clear about *why*, so nobody reads this as "Bayesian
+optimization is useless." The literature is actually consistent on when fancy search pays off:
+when **each evaluation is expensive or the space is large** (deep nets, huge models, dozens of
+knobs). For a **cheap model tuned over a small, sensible grid** — exactly the regime here — the
+gains shrink into the noise. Even the classic "random beats grid" result
+([Bergstra & Bengio, 2012](https://jmlr.org/papers/v13/bergstra12a.html)) is about *dense*
+grids that squander budget on knobs that don't matter; a small grid hand-focused on the few
+that do sidesteps it. And multi-fidelity (Hyperband/BOHB) was built to prune *expensive*
+low-fidelity runs cheaply — a bargain that quietly disappears once "one evaluation" means a
+full cross-validation. So read this narrowly: **on cheap tabular gradient boosting with a
+modest budget, a sensible grid is hard to beat.** Scale up to expensive models or big search
+spaces and the clever methods are back in their element.
+
 *Next in the series: the ensemble myth — is "a thousand LightGBM configs" really faster than
 building an ensemble? Code and all the numbers are in the study repo; every p-value is a
 paired t-test on the same splits.*
