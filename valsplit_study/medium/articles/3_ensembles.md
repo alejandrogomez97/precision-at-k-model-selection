@@ -11,7 +11,10 @@ do next.*
 
 The shared rig, briefly:
 
-- **89 imbalanced binary datasets**, metric **Average Precision** (PR-AUC).
+- Imbalanced binary datasets, metric **Average Precision** (PR-AUC). The series draws on 89 of
+  them, but the ensemble experiments here are far heavier per run (an ensemble is ~5× a single
+  model), so this part uses a **representative 16-dataset subset** — and **8** for the
+  equal-time comparison, its most expensive piece.
 - **A fixed, shared test set** touched once; a **fraction sweep** (10%…100% of each
   dataset's development pool) so we see behavior with little and lots of data.
 - Base learner: **LightGBM** with early stopping; per-fold preprocessing, no leakage.
