@@ -81,9 +81,10 @@ mst = [m for m in HPO_ORDER if m in st.columns]
 rows = [[str(int(b))] + [f"{st.loc[b, m]:.0f}s" for m in mst] for b in st.index]
 render("table2b_hpo_time.png", "HPO methods: total search time (s) by budget",
        ["# configs"] + mst, rows, [(list(range(1, len(mst) + 1)), False)],
-       "Green = fastest, red = slowest. Same number of configs, wildly different wall-clock: the "
-       "multi-fidelity methods (hyperband, bohb) match the others' AP in ~15x less time by killing "
-       "bad configs after a few trees; GP is ~2.5x faster than the grid.")
+       "Green = fastest, red = slowest, per row (E2 / CV selection). Same number of configs, "
+       "different wall-clock: the learning samplers (tpe, gp, cmaes) run around grid speed, while "
+       "the multi-fidelity methods (hyperband, bohb) are ~1.5x SLOWER here — pruning on out-of-fold "
+       "needs all K folds. (Their famous ~20x speedup only appears with a single held-out val.)")
 
 # ---- Tabla 3: iso-tiempo ----
 d = pd.read_csv(f"{STUDY}/summary_isofinal.csv").dropna(subset=["e1_at", "e2_at", "ens_e1_at"])
