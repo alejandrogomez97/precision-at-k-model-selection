@@ -65,9 +65,8 @@ average of probabilities whose weights are chosen by hill-climbing. Two symmetri
 mirroring the E1/E2 split from part one:
 
 - **ens-E1:** learn the blend on a separate `val`. Trains each family once → cheap.
-- **ens-E2:** learn the blend on the CV out-of-fold predictions and refit the families on
-  all dev. That's 4 folds × 10 families + 10 refits = **50 trainings** vs 10 → several times
-  slower.
+- **ens-E2:** learn the blend on the CV out-of-fold predictions — so it cross-validates all
+  ten families (4 folds each) instead of training them once → several times more work.
 
 The headline — and this is the number I actually wanted: **an honest ensemble beats a
 hyperparameter-tuned LightGBM by about +0.01 AP, roughly +1.5% relative, winning ~70% of the
@@ -97,10 +96,11 @@ strategy short-changed.
 seconds and dozens of extra configs or members, none of the cheaper strategies catches it:
 ens-E2 beats grown **ens-E1@t\*** by +0.0147 AP (winning **87%** of cells, p = 4×10⁻¹⁷),
 **E1@t\*** by +0.013 (**75%**, p = 1×10⁻⁶) and **E2@t\*** by +0.010 (**76%**, p = 2×10⁻⁵).
-The advantage isn't about time; it's **structural**: ens-E2 uses all of dev *twice over* —
-once via out-of-fold predictions to learn the blend, and again to refit the final members.
-Throwing more configs at a single LightGBM, or more members at a blend trained on a held-out
-slice, simply saturates.
+The advantage isn't about time; it's **structural**: ens-E2 blends **ten genuinely different
+model families**, each catching patterns the others miss, with weights learned honestly on
+out-of-fold predictions. Throwing more configs at a single LightGBM, or more members at a
+blend trained on a held-out slice, simply saturates — you can't out-tune your way to the
+diversity of a real ensemble.
 
 *[FIGURE 2 — fig_isofinal.png]*
 
@@ -114,12 +114,11 @@ actually trains — this is the part people get wrong:
 - **Plain E1 and plain E2 both sweep the *same* 18 LightGBM candidates** (6 hyperparameter
   settings × 3 imbalance-handling options). That grid search *is* the habit this article is
   about — "plain E1/E2" was never a single model. E1 scores each candidate on a held-out val;
-  E2 scores each with 4-fold out-of-fold predictions and then refits the single winner on all
-  dev.
+  E2 scores each with 4-fold out-of-fold predictions.
 - **The ensembles don't search configs at all.** They train a fixed pool of **10 diverse
   families, one config each** (no per-family tuning). ens-E1 trains each family *once* and
-  blends on val; ens-E2 gets each family's OOF via 4-fold CV, blends on the OOF, and refits all
-  ten on dev (≈ 4×10 + 10 = **50 trainings**).
+  blends on val; ens-E2 cross-validates each family (4 folds) and blends on the out-of-fold
+  predictions.
 
 That reshuffles the cost ranking in a way that catches people off guard:
 
@@ -127,8 +126,8 @@ That reshuffles the cost ranking in a way that catches people off guard:
   trainings beat E1's eighteen configs (each of which also pays an inner CV just to fix its
   tree count). The ensemble is cheaper *because it skips the config search*, not in spite of it.
 - **ens-E2 is the priciest, ~5× the base strategies — but not because it searches more.** It
-  trains *fewer* models than plain E2 (10 families vs 18 configs); the cost comes from CV-ing
-  **and** refitting a pool of **heavy learners** — CatBoost, MLP, XGBoost and random forests are
+  trains *fewer* models than plain E2 (10 families vs 18 configs); the cost comes from
+  cross-validating a pool of **heavy learners** — CatBoost, MLP, XGBoost and random forests are
   each far slower to train than a single LightGBM. A fast model × many configs still ends up
   cheaper than slow models × a few. That's the real asymmetry.
 - When over-funded to t\*, E1@t\* and E2@t\* spend it on more grid configs, and ens-E1@t\*
@@ -138,10 +137,7 @@ That reshuffles the cost ranking in a way that catches people off guard:
 *[TABLE 2 — table3b_ens_time.png]*
 
 **The takeaway:** the "many LightGBM configs is faster" argument is a false economy. Those
-configs cost the same time as an ensemble — and at equal time, the ensemble wins. (One
-practical nuance: for the ensemble, the retrain-vs-bagged distinction that mattered for a
-single model washes out — a 10-model blend already tames variance — so use the cheaper,
-bagged version.)
+configs cost the same time as an ensemble — and at equal time, the ensemble wins.
 
 **How it was done.** 16 datasets (8 for the equal-time comparison), 10 fractions, 2 seeds.
 Pool of 10 families, one fixed config each, no tuning. The blend is greedy Caruana selection
