@@ -68,22 +68,15 @@ def main():
 
     by = mb.groupby("frac").agg(**{k: (k, "mean") for k in
         ["e1_ap", "e1_at", "ens_e1", "ens_e1_at", "e2_ap", "e2_at", "ens_e2", "e2ens_t"]}).reset_index()
-    fig, ax = plt.subplots(1, 2, figsize=(13, 5))
-    ax[0].plot(by.frac, by.ens_e2, "s-", color="#c0392b", lw=2, label=L("ens-E2 (referencia t*)", "ens-E2 (t* reference)"))
-    ax[0].plot(by.frac, by.ens_e1_at, "v--", color="#e08e83", label="ens-E1 @t*")
-    ax[0].plot(by.frac, by.e1_at, "o--", color="#1f77b4", label="E1 @t*")
-    ax[0].plot(by.frac, by.e2_at, "^--", color="#5ba3d0", label="E2 @t*")
-    ax[0].set_xlabel(L("fracción dev", "dev fraction")); ax[0].set_ylabel(L("AP (test) a igualdad de tiempo", "AP (test) at equal time"))
-    ax[0].set_title(L("A igualdad de tiempo (t* = tiempo de ens-E2)", "At equal time (t* = ens-E2's time)"))
-    ax[0].legend(fontsize=8); ax[0].grid(alpha=.3)
-    m["best_at"] = m[["e1_at", "e2_at", "ens_e1_at"]].max(axis=1)
-    ax[1].scatter(m.best_at, m.ens_e2, s=16, alpha=.6)
-    lim = [np.nanmin([m.best_at.min(), m.ens_e2.min()]), np.nanmax([m.best_at.max(), m.ens_e2.max()])]
-    ax[1].plot(lim, lim, "k--", lw=.8)
-    ax[1].set_xlabel(L("mejor alternativa @t* (E1/E2/ens-E1)", "best alternative @t* (E1/E2/ens-E1)")); ax[1].set_ylabel("ens-E2")
-    ax[1].set_title(L("ens-E2 vs mejor alternativa @t* (por celda)", "ens-E2 vs best alternative @t* (per cell)")); ax[1].grid(alpha=.3)
-    plt.suptitle(L("Apartado 8 — a igualdad de tiempo, ¿qué gana?",
-                   "Section 8 — at equal time, what wins?"), fontweight="bold")
+    fig, ax = plt.subplots(figsize=(8.5, 5.2))
+    ax.plot(by.frac, by.ens_e2, "s-", color="#c0392b", lw=2.2, label=L("ens-E2 (referencia t*)", "ens-E2 (t* reference)"))
+    ax.plot(by.frac, by.ens_e1_at, "v--", color="#e08e83", label="ens-E1 @t*")
+    ax.plot(by.frac, by.e1_at, "o--", color="#1f77b4", label="E1 @t*")
+    ax.plot(by.frac, by.e2_at, "^--", color="#5ba3d0", label="E2 @t*")
+    ax.set_xlabel(L("fracción dev", "dev fraction")); ax.set_ylabel(L("AP (test) a igualdad de tiempo", "AP (test) at equal time"))
+    ax.set_title(L("Apartado 8 — a igualdad de tiempo (t* = tiempo de ens-E2)",
+                   "At equal time — everyone gets ens-E2's time budget (t*)"), fontweight="bold")
+    ax.legend(fontsize=9); ax.grid(alpha=.3)
     plt.tight_layout(); plt.savefig(f"{STUDY}/fig_isofinal{SUF}.png", dpi=130); plt.close()
     print(by.round(3).to_string(index=False)); print(json.dumps(out, indent=1)[:700])
     print("fig -> fig_isofinal.png")
