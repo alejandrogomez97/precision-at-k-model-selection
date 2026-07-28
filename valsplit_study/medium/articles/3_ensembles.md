@@ -1,4 +1,4 @@
-# Training a thousand LightGBMs is a waste of time — build the ensemble
+# Stop training a thousand LightGBMs. It's the worst thing you can do.
 
 *Part three of a series putting common ML habits to the test. LightGBM's one selling point is
 speed, so training a thousand of them to hunt for a good config is self-defeating: you burn an
