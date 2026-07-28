@@ -69,21 +69,25 @@ mirroring the E1/E2 split from part one:
   ten families (4 folds each) instead of training them once → several times more work.
 
 The headline — and this is the number I actually wanted: **an honest ensemble beats a
-hyperparameter-tuned LightGBM by about +0.01 AP, roughly +1.5% relative, winning ~70% of the
-time.** It's clearly significant (p ranges from **2×10⁻⁸** in the broad comparison to **6×10⁻⁶**
-at strictly equal time) — a real lift, not noise. So the ceiling of "more configs of one model"
-sits about a percent-and-a-half below what a small, diverse blend reaches. The catch: the
-ensemble costs several times the compute. ens-E1 (the cheap, held-out-val ensemble), at equal
-time, doesn't beat E1.
+hyperparameter-tuned LightGBM by +0.0104 AP — a +1.5% relative gain — winning 72% of the
+head-to-heads, at paired *p* = 6×10⁻⁶ (n = 160).** A real lift, not noise: the ceiling of "more
+configs of one model" sits about a percent-and-a-half below what a small, diverse blend
+reaches. The catch is cost — the ensemble takes several times the compute — and that's exactly
+the objection I take seriously next.
 
 *[FIGURE 1 — fig_C_isotime.png]*
 
 ## The fair fight: give everyone the ensemble's time budget
 
-Ensembles help but cost more, and the "many configs" crowd would say that settles it. It
-doesn't. So I ran the scrupulously fair experiment: take ens-E2's wall-clock time per
-problem (call it **t\***) and give it to every cheaper strategy, letting each **grow until
-it crosses t\***:
+First, briefly, *why* these strategies cost different amounts — because it's the whole
+motivation here. They don't all take the same time: **ens-E1 is actually the cheapest** (~19s
+— it trains its 10 families once and averages them), a plain **LightGBM sweep sits in the
+middle** (~37s for its 18 configs), and **ens-E2 is the priciest, ~5× the rest** (~216s) — not
+because it searches more, but because it cross-validates a pool of *heavy* learners (CatBoost,
+MLP, random forests, each far slower than a LightGBM). The "many configs" crowd would say that
+extra cost settles it in their favour. It doesn't. So I ran the scrupulously fair experiment:
+take ens-E2's wall-clock time per problem (call it **t\***) and give it to every cheaper
+strategy, letting each **grow until it crosses t\***:
 
 - **E1@t\*** and **E2@t\*** keep adding LightGBM grid configs until they've spent t\*.
 - **ens-E1@t\*** keeps adding ensemble members (from an extended pool) until it too has spent
@@ -105,42 +109,6 @@ diversity of a real ensemble.
 *[FIGURE 2 — fig_isofinal.png]*
 
 *[TABLE 1 — table3_isotime.png]*
-
-## Where the time actually goes
-
-It's worth seeing the cost side directly, because it holds a twist. First, what each strategy
-actually trains — this is the part people get wrong:
-
-- **Plain E1 and plain E2 both sweep the *same* 18 LightGBM candidates** (6 hyperparameter
-  settings × 3 imbalance-handling options). That grid search *is* the habit this article is
-  about — "plain E1/E2" was never a single model. E1 scores each candidate on a held-out val
-  (~18 quick fits); E2 scores each one with **4-fold cross-validation**, so those 18 configs
-  turn into **≈ 18 × 4 ≈ 70 model trainings**.
-- **The ensembles don't search configs at all.** They train a fixed pool of **10 diverse
-  families, one config each** (no per-family tuning). ens-E1 trains each family **once — just
-  10 trainings — and averages them**; ens-E2 cross-validates each family (4 folds) and blends
-  on the out-of-fold predictions, so **≈ 10 × 4 ≈ 40 trainings**.
-
-That reshuffles the cost ranking in a way that catches people off guard:
-
-- **ens-E1 is the *cheapest* of all four — even cheaper than plain E1 or E2.** But not by a
-  landslide, and the counts tell you why: ens-E1 trains **10 models** (then just averages them),
-  while plain E1 sweeps **18 configs** — the same ballpark. That's why the two end up close
-  (~19s vs ~37s) rather than orders apart: ens-E1 edges ahead only *because it skips the config
-  search*, not because it does dramatically less work.
-- **ens-E2 is the priciest, ~5× the base strategies — but not because it searches more.** It
-  actually runs **fewer** trainings than plain E2 (~40 vs ~70); the cost comes from
-  cross-validating a pool of **heavy learners** — CatBoost, MLP, XGBoost and random forests are
-  each far slower to train than a single LightGBM. A fast model × many trainings still ends up
-  cheaper than slow models × fewer. That's the real asymmetry.
-- When over-funded to t\*, E1@t\* and E2@t\* spend it on more grid configs, and ens-E1@t\*
-  spends it on more members — and it *still* loses. Cheap-and-plentiful can't buy the
-  structural edge.
-
-*[TABLE 2 — table3b_ens_time.png]*
-
-**The takeaway:** the "many LightGBM configs is faster" argument is a false economy. Those
-configs cost the same time as an ensemble — and at equal time, the ensemble wins.
 
 **How it was done.** 16 datasets (8 for the equal-time comparison), 10 fractions, 2 seeds.
 Pool of 10 families, one fixed config each, no tuning. The blend is greedy Caruana selection
