@@ -113,23 +113,26 @@ actually trains — this is the part people get wrong:
 
 - **Plain E1 and plain E2 both sweep the *same* 18 LightGBM candidates** (6 hyperparameter
   settings × 3 imbalance-handling options). That grid search *is* the habit this article is
-  about — "plain E1/E2" was never a single model. E1 scores each candidate on a held-out val;
-  E2 scores each with 4-fold out-of-fold predictions.
+  about — "plain E1/E2" was never a single model. E1 scores each candidate on a held-out val
+  (~18 quick fits); E2 scores each one with **4-fold cross-validation**, so those 18 configs
+  turn into **≈ 18 × 4 ≈ 70 model trainings**.
 - **The ensembles don't search configs at all.** They train a fixed pool of **10 diverse
-  families, one config each** (no per-family tuning). ens-E1 trains each family *once* and
-  blends on val; ens-E2 cross-validates each family (4 folds) and blends on the out-of-fold
-  predictions.
+  families, one config each** (no per-family tuning). ens-E1 trains each family **once — just
+  10 trainings — and averages them**; ens-E2 cross-validates each family (4 folds) and blends
+  on the out-of-fold predictions, so **≈ 10 × 4 ≈ 40 trainings**.
 
 That reshuffles the cost ranking in a way that catches people off guard:
 
-- **ens-E1 is the *cheapest* of all four — even cheaper than plain E1 or E2.** Ten single
-  trainings beat E1's eighteen configs (each of which also pays an inner CV just to fix its
-  tree count). The ensemble is cheaper *because it skips the config search*, not in spite of it.
+- **ens-E1 is the *cheapest* of all four — even cheaper than plain E1 or E2.** But not by a
+  landslide, and the counts tell you why: ens-E1 trains **10 models** (then just averages them),
+  while plain E1 sweeps **18 configs** — the same ballpark. That's why the two end up close
+  (~19s vs ~37s) rather than orders apart: ens-E1 edges ahead only *because it skips the config
+  search*, not because it does dramatically less work.
 - **ens-E2 is the priciest, ~5× the base strategies — but not because it searches more.** It
-  trains *fewer* models than plain E2 (10 families vs 18 configs); the cost comes from
+  actually runs **fewer** trainings than plain E2 (~40 vs ~70); the cost comes from
   cross-validating a pool of **heavy learners** — CatBoost, MLP, XGBoost and random forests are
-  each far slower to train than a single LightGBM. A fast model × many configs still ends up
-  cheaper than slow models × a few. That's the real asymmetry.
+  each far slower to train than a single LightGBM. A fast model × many trainings still ends up
+  cheaper than slow models × fewer. That's the real asymmetry.
 - When over-funded to t\*, E1@t\* and E2@t\* spend it on more grid configs, and ens-E1@t\*
   spends it on more members — and it *still* loses. Cheap-and-plentiful can't buy the
   structural edge.
