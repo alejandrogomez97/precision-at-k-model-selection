@@ -1,9 +1,10 @@
-# We use LightGBM because it's fast. So why do we train thousands of them?
+# Training a thousand LightGBMs is a waste of time — build the ensemble
 
-*Part three of a series putting common ML habits to the test on 89 imbalanced datasets.
-This is the habit I hear most, and it's the most seductive because its premise is actually
-true: a single LightGBM really is faster than a 10-model blend. The mistake is what people
-do next.*
+*Part three of a series putting common ML habits to the test. LightGBM's one selling point is
+speed, so training a thousand of them to hunt for a good config is self-defeating: you burn an
+ensemble's worth of compute and still cap out at a single model's ceiling — the worst of both
+worlds. So I measured it directly: on the same time budget, how much does an honest ensemble
+actually improve over a hyperparameter-tuned LightGBM? The % gain, and whether it's real.*
 
 ---
 
@@ -46,10 +47,14 @@ Which makes the habit doubly ironic: **nobody trains just one LightGBM.** They t
 hundreds, a thousand configs, sweeping hyperparameters — and *that* is where the time goes.
 We reach for the model built to save time, and then spend it all anyway. Once you add up all
 those configs, you've spent as much compute as an ensemble would have cost… you just have
-nothing better than a single tuned LightGBM to show for it.
+nothing better than a single tuned LightGBM to show for it. **It's the worst of both worlds:
+you throw away LightGBM's only advantage (speed), and you never reach the depth a diverse
+ensemble gives you.**
 
 So the honest question isn't "single model vs ensemble". It's: **given the time you were
-going to burn on all those configs anyway, what gives the best AP?**
+going to burn on all those configs anyway, what gives the best AP — and by how much?** That's
+what I set out to estimate: the improvement of a proper ensemble over a hyperparameter-tuned
+LightGBM, as a percentage, and whether it's statistically real.
 
 ## The ensemble
 
@@ -64,9 +69,13 @@ mirroring the E1/E2 split from part one:
   all dev. That's 4 folds × 10 families + 10 refits = **50 trainings** vs 10 → several times
   slower.
 
-The headline: **ens-E2 beats plain E2 in about two of every three cases** (ΔAP **+0.012**,
-p = **2×10⁻⁸**) — a real, significant improvement — but at several times the time. ens-E1, at
-equal time, doesn't beat E1.
+The headline — and this is the number I actually wanted: **an honest ensemble beats a
+hyperparameter-tuned LightGBM by about +0.01 AP, roughly +1.5% relative, winning ~70% of the
+time.** It's clearly significant (p ranges from **2×10⁻⁸** in the broad comparison to **6×10⁻⁶**
+at strictly equal time) — a real lift, not noise. So the ceiling of "more configs of one model"
+sits about a percent-and-a-half below what a small, diverse blend reaches. The catch: the
+ensemble costs several times the compute. ens-E1 (the cheap, held-out-val ensemble), at equal
+time, doesn't beat E1.
 
 *[FIGURE 1 — fig_C_isotime.png]*
 
@@ -101,8 +110,15 @@ slice, simply saturates.
 
 It's worth seeing the cost side directly, because it holds a twist:
 
-- **ens-E1 is the *cheapest* strategy of all** — it trains each family just once, so it's
-  even cheaper than plain E1 or E2.
+- **ens-E1 is the *cheapest* strategy of all — even cheaper than plain E1 or E2.** This
+  surprises people, so it's worth spelling out: "plain E1" is *not* a single model. It's the
+  habit this article is about — sweeping the whole LightGBM candidate grid (6 hyperparameter
+  settings × 3 imbalance-handling options = **18 LightGBMs**) and keeping the best on the val
+  set. ens-E1, by contrast, trains its **10 diverse families exactly once each** (no per-family
+  tuning) and blends them. Ten single trainings beat eighteen — even though a couple of members
+  (CatBoost, MLP) are individually heavier than a LightGBM, you simply train far fewer models
+  than the grid sweep does. So the ensemble is cheaper *because it skips the config search*,
+  not in spite of it.
 - **ens-E2 is the priciest, ~5× the base strategies** — the price of using all of dev for
   both the blend and the refit.
 - When over-funded to t\*, E1@t\* and E2@t\* spend it on more grid configs, and ens-E1@t\*
