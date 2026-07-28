@@ -64,7 +64,9 @@ each, *no* per-family tuning) and combined them with a **greedy Caruana blend**:
 average of probabilities whose weights are chosen by hill-climbing. Two symmetric flavors,
 mirroring the E1/E2 split from part one:
 
-- **ens-E1:** learn the blend on a separate `val`. Trains each family once → cheap.
+- **ens-E1:** learn the blend on a separate `val`. Trains each family just once → **cheap —
+  in fact cheaper than plain E1 itself**, because it never runs the 18-config grid search: it
+  just trains the 10 models once and blends them.
 - **ens-E2:** learn the blend on the CV out-of-fold predictions — so it cross-validates all
   ten families (4 folds each) instead of training them once → several times more work.
 

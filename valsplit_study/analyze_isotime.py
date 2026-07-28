@@ -86,27 +86,21 @@ def main():
         ens_e1_t=("ens_full_t", "mean"), ens_e2_t=("e2ens_t", "mean"),
         n=("e1_ap", "size")).reset_index()
 
-    fig, ax = plt.subplots(1, 3, figsize=(17, 5))
+    fig, ax = plt.subplots(1, 2, figsize=(13, 5))
     # panel 1: AP — E1 y su ensemble-E1 (a tiempo de E1); E2 y su ensemble-E2
     ax[0].plot(by["frac"], by["e1_ap"], "o-", color="#1f77b4", label="E1 (grid LGBM)")
     ax[0].plot(by["frac"], by["ens_e1"], "^--", color="#5ba3d0", label=L("ensemble-E1 (blend en val)", "ensemble-E1 (blend on val)"))
     ax[0].plot(by["frac"], by["e2_ap"], "s-", color="#c0392b", label="E2 (grid LGBM)")
-    ax[0].plot(by["frac"], by["ens_e2"], "v--", color="#e08e83", label=L("ensemble-E2 (blend OOF+refit)", "ensemble-E2 (blend OOF+refit)"))
+    ax[0].plot(by["frac"], by["ens_e2"], "v--", color="#e08e83", label=L("ensemble-E2 (blend OOF)", "ensemble-E2 (blend on OOF)"))
     ax[0].set_xlabel(L("fracción dev", "dev fraction")); ax[0].set_ylabel("AP (test)")
     ax[0].set_title(L("AP: cada ensemble vs su estrategia", "AP: each ensemble vs its strategy")); ax[0].legend(fontsize=8); ax[0].grid(alpha=.3)
 
-    ax[1].axhline(.5, color="k", lw=.8, ls="--")
-    ax[1].plot(by["frac"], by["win_e1"], "o-", color="#1f77b4", label=L("ens-E1 > E1 (iso-tiempo)", "ens-E1 > E1 (equal time)"))
-    ax[1].plot(by["frac"], by["win_e2ens"], "s-", color="#c0392b", label="ens-E2 > E2 (test)")
-    ax[1].set_ylim(0, 1); ax[1].set_xlabel(L("fracción dev", "dev fraction"))
-    ax[1].set_title(L("¿El ensemble gana a su estrategia?", "Does the ensemble beat its strategy?")); ax[1].legend(fontsize=8); ax[1].grid(alpha=.3)
-
-    ax[2].plot(by["frac"], by["e1_t"], "o-", color="#1f77b4", label=L("tiempo E1", "time E1"))
-    ax[2].plot(by["frac"], by["ens_e1_t"], "^-", color="#5ba3d0", label=L("tiempo ens-E1", "time ens-E1"))
-    ax[2].plot(by["frac"], by["e2_t"], "s-", color="#c0392b", label=L("tiempo E2", "time E2"))
-    ax[2].plot(by["frac"], by["ens_e2_t"], "v-", color="#e08e83", label=L("tiempo ens-E2", "time ens-E2"))
-    ax[2].set_yscale("log"); ax[2].set_xlabel(L("fracción dev", "dev fraction")); ax[2].set_ylabel("s")
-    ax[2].set_title(L("Tiempos", "Times")); ax[2].legend(fontsize=8); ax[2].grid(alpha=.3)
+    ax[1].plot(by["frac"], by["e1_t"], "o-", color="#1f77b4", label=L("tiempo E1", "time E1"))
+    ax[1].plot(by["frac"], by["ens_e1_t"], "^-", color="#5ba3d0", label=L("tiempo ens-E1", "time ens-E1"))
+    ax[1].plot(by["frac"], by["e2_t"], "s-", color="#c0392b", label=L("tiempo E2", "time E2"))
+    ax[1].plot(by["frac"], by["ens_e2_t"], "v-", color="#e08e83", label=L("tiempo ens-E2", "time ens-E2"))
+    ax[1].set_yscale("log"); ax[1].set_xlabel(L("fracción dev", "dev fraction")); ax[1].set_ylabel("s")
+    ax[1].set_title(L("Tiempos", "Times")); ax[1].legend(fontsize=8); ax[1].grid(alpha=.3)
     plt.suptitle(L("Fase C — ensemble estilo E1 vs E1, y estilo E2 vs E2",
                    "Phase C — E1-style ensemble vs E1, and E2-style vs E2"), fontweight="bold")
     plt.tight_layout(); plt.savefig(f"{STUDY}/fig_C_isotime{SUF}.png", dpi=130); plt.close()
