@@ -112,6 +112,12 @@ diversity of a real ensemble.
 
 *[TABLE 1 — table3_isotime.png]*
 
+*One note if you compare this chart with the earlier one: ens-E2 sits a bit higher here in
+absolute terms. That's not the strategy improving — this equal-time panel runs on the 8
+datasets where every @t\* variant completed, and those 8 happen to be a touch easier on average
+than the full 16 (ens-E2 ≈ 0.70 vs 0.68). Read the **gaps within each figure**, not the
+absolute levels across them.*
+
 **How it was done.** 16 datasets (8 for the equal-time comparison), 10 fractions, 2 seeds.
 Pool of 10 families, one fixed config each, no tuning. The blend is greedy Caruana selection
 with replacement, maximizing AP (it usually keeps 2–4 families). Equal-time: t\* = the
